@@ -5,8 +5,10 @@ const tourSchema = new mongoose.Schema({
     description: String,
     location: String,
     price: Number,
-    slots: Number,
-    image: String,
-});
+    availableSlots: Number,
+    imageUrl: String,
+},
+    { timestamps: true }
+);
 
 export default mongoose.model("Tour", tourSchema);
