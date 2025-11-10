@@ -6,7 +6,7 @@ const tourSchema = new mongoose.Schema({
     location: String,
     price: Number,
     availableSlots: Number,
-    imageUrl: String,
+    image: String,
 },
     { timestamps: true }
 );
