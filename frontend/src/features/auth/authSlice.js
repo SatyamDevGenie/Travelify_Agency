@@ -47,6 +47,40 @@ export const logout = createAsyncThunk("auth/logout", async () => {
 
 
 
+// updateProfile thunk
+export const updateProfile = createAsyncThunk(
+    "auth/updateProfile",
+    async (updatedData, thunkAPI) => {
+        try {
+            const state = thunkAPI.getState(); // get full state
+            const token = state.auth.user?.token; // fresh token from Redux state
+
+            if (!token) {
+                return thunkAPI.rejectWithValue("No token found");
+            }
+
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            };
+
+            const res = await axios.put(`${API_URL}/profile`, updatedData, config);
+
+            // Update localStorage with new user data
+            localStorage.setItem("user", JSON.stringify(res.data));
+            return res.data;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(
+                error.response?.data?.message || error.message
+            );
+        }
+    }
+);
+
+
+
+
 // =======================
 // Auth Slice
 // =======================
@@ -105,6 +139,24 @@ const authSlice = createSlice({
             .addCase(logout.fulfilled, (state) => {
                 state.user = null;
             })
+
+            // Update Profile
+            .addCase(updateProfile.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(updateProfile.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.user = action.payload;
+                state.isSuccess = true;
+                state.isError = false;
+                state.message = "Profile updated successfully";
+            })
+            .addCase(updateProfile.rejected, (state, action) => {
+                state.isLoading = false;
+                state.isError = true;
+                state.isSuccess = false;
+                state.message = action.payload;
+            });
     },
 });
 
