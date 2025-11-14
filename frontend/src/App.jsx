@@ -1,10 +1,29 @@
 import React from "react";
+import Navbar from "./components/Navbar";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import About from "./pages/About";
+import Footer from "./components/Footer";
+
+
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
 
 function App() {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-yellow-300 text-amber-950 text-5xl font-bold">
-      Travelify Agency 2025 by Satyam Sawant
-    </div>
+    <Router>
+      <Navbar />
+      <div className="pt-20">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+        </Routes>
+      </div>
+      <Footer />
+    </Router>
   );
 }
 
