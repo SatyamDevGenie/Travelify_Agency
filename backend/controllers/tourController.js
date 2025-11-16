@@ -12,6 +12,34 @@ export const getTours = async (req, res) => {
     }
 };
 
+
+// @desc Get single tour
+export const getTourById = async (req, res) => {
+    try {
+        const tour = await Tour.findById(req.params.id);
+
+        if (!tour) {
+            return res.status(404).json({
+                success: false,
+                message: "Tour not found"
+            });
+        }
+
+        res.json({
+            success: true,
+            data: tour,
+        });
+
+    } catch (error) {
+        console.error("Error fetching single tour:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error fetching tour"
+        });
+    }
+};
+
+
 // @desc Create new tour (Admin)
 export const createTour = async (req, res) => {
     try {

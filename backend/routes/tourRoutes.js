@@ -5,6 +5,7 @@ import {
     createTour,
     updateTour,
     deleteTour,
+    getTourById,
 } from "../controllers/tourController.js";
 import { protect, admin } from "../middleware/authMiddleware.js";
 
@@ -23,6 +24,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 router.get("/", getTours);
+router.get("/:id", getTourById);
 router.post("/", protect, admin, upload.single("image"), createTour);
 router.put("/:id", protect, admin, upload.single("image"), updateTour);
 router.delete("/:id", protect, admin, deleteTour);
