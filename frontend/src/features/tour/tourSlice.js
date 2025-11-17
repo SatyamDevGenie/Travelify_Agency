@@ -37,6 +37,11 @@ export const createTour = createAsyncThunk(
             formData.append("price", tourData.price);
             formData.append("location", tourData.location);
             formData.append("availableSlots", tourData.availableSlots);
+
+            // ✅ Append missing fields
+            formData.append("category", tourData.category);
+            formData.append("subcategory", tourData.subcategory);
+
             if (tourData.image) formData.append("image", tourData.image);
 
             const res = await axios.post(`${API_URL}/`, formData, {
@@ -55,6 +60,8 @@ export const createTour = createAsyncThunk(
     }
 );
 
+
+
 // ===============================
 // 🔹 UPDATE TOUR
 // ===============================
@@ -65,17 +72,22 @@ export const updateTour = createAsyncThunk(
             const token = getState().auth.user?.token;
             if (!token) return rejectWithValue("Unauthorized: No token found");
 
-            const formData = new FormData();
-            formData.append("title", updatedData.title);
-            formData.append("description", updatedData.description);
-            formData.append("price", updatedData.price);
-            formData.append("location", updatedData.location);
-            formData.append("availableSlots", updatedData.availableSlots);
-            if (updatedData.image) formData.append("image", updatedData.image);
+            // If updatedData is FormData (with image), we use it directly
+            // Otherwise, we convert price & availableSlots to numbers
+            let payload;
+            if (updatedData instanceof FormData) {
+                payload = updatedData;
+            } else {
+                payload = {
+                    ...updatedData,
+                    price: Number(updatedData.price),
+                    availableSlots: Number(updatedData.availableSlots),
+                };
+            }
 
-            const { data } = await axios.put(`${API_URL}/${id}`, formData, {
+            const { data } = await axios.put(`${API_URL}/${id}`, payload, {
                 headers: {
-                    "Content-Type": "multipart/form-data",
+                    "Content-Type": updatedData instanceof FormData ? "multipart/form-data" : "application/json",
                     Authorization: `Bearer ${token}`,
                 },
             });
@@ -88,6 +100,8 @@ export const updateTour = createAsyncThunk(
         }
     }
 );
+
+
 
 // ===============================
 // 🔹 DELETE TOUR

@@ -40,31 +40,47 @@ export const getTourById = async (req, res) => {
 };
 
 
+
 // @desc Create new tour (Admin)
 export const createTour = async (req, res) => {
     try {
-        const { title, description, price, availableSlots, location } = req.body;
+        // Destructure data from request body
+        const { title, description, price, availableSlots, location, category, subcategory } = req.body;
 
+        // Validate required fields
+        if (!title || !description || !price || !availableSlots || !location || !category || !subcategory) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
+
+        // Upload image if provided
         let imageUrl = "";
         if (req.file) {
             const uploadedImage = await cloudinary.uploader.upload(req.file.path, {
                 folder: "travel_tours",
+                use_filename: true,
+                unique_filename: false,
             });
             imageUrl = uploadedImage.secure_url;
 
-            // ✅ Delete local temp file after upload
+            // Remove local file after upload
             fs.unlinkSync(req.file.path);
+        } else {
+            return res.status(400).json({ message: "Tour image is required" });
         }
 
+        // Create new tour document
         const tour = await Tour.create({
             title,
             description,
             price,
             availableSlots,
             location,
+            category,
+            subcategory,
             image: imageUrl,
         });
 
+        // Success response
         res.status(201).json({
             success: true,
             message: "Tour created successfully",
@@ -72,7 +88,15 @@ export const createTour = async (req, res) => {
         });
     } catch (error) {
         console.error("Error creating tour:", error);
-        res.status(500).json({ message: "Error creating tour" });
+
+        // Check for Mongoose validation errors
+        if (error.name === "ValidationError") {
+            const messages = Object.values(error.errors).map((val) => val.message);
+            return res.status(400).json({ message: messages.join(", ") });
+        }
+
+        // Fallback server error
+        res.status(500).json({ message: "Server error: unable to create tour" });
     }
 };
 
@@ -82,8 +106,19 @@ export const updateTour = async (req, res) => {
         const tour = await Tour.findById(req.params.id);
         if (!tour) return res.status(404).json({ message: "Tour not found" });
 
-        const { title, description, price, availableSlots, location } = req.body;
+        console.log("Request body:", req.body); // Debug
 
+        const {
+            title,
+            description,
+            price,
+            availableSlots,
+            location,
+            category,
+            subcategory,
+        } = req.body;
+
+        // Update image if uploaded
         if (req.file) {
             const uploadedImage = await cloudinary.uploader.upload(req.file.path, {
                 folder: "travel_tours",
@@ -92,13 +127,17 @@ export const updateTour = async (req, res) => {
             fs.unlinkSync(req.file.path);
         }
 
-        tour.title = title || tour.title;
-        tour.description = description || tour.description;
-        tour.price = price || tour.price;
-        tour.availableSlots = availableSlots || tour.availableSlots;
-        tour.location = location || tour.location;
+        // Update fields (all as strings first, convert numbers where needed)
+        if (title) tour.title = title;
+        if (description) tour.description = description;
+        if (price) tour.price = Number(price);
+        if (availableSlots) tour.availableSlots = Number(availableSlots);
+        if (location) tour.location = location; // <== important
+        if (category) tour.category = category;
+        if (subcategory) tour.subcategory = subcategory;
 
         const updatedTour = await tour.save();
+
         res.json({
             success: true,
             message: "Tour updated successfully",
@@ -109,6 +148,10 @@ export const updateTour = async (req, res) => {
         res.status(500).json({ message: "Error updating tour" });
     }
 };
+
+
+
+
 
 // @desc Delete tour (Admin)
 export const deleteTour = async (req, res) => {
