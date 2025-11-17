@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import Tours from "../components/Tours";
+import BlockbusterOffers from "../components/Offers";
 
 const Home = () => {
     return (
@@ -69,6 +70,9 @@ const Home = () => {
             <div className="px-4 sm:px-6 lg:px-10 py-10">
                 <Tours />
             </div>
+
+            {/* Blockbuster Offers */}
+            <BlockbusterOffers />
 
         </div>
     );
