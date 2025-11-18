@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTourById, deleteTour } from "../features/tour/tourSlice";
 import { useParams, useNavigate } from "react-router-dom";
+// Import toast
+import { toast } from "react-toastify";
 
 const TourDetail = () => {
   const { id } = useParams();
@@ -32,14 +34,20 @@ const TourDetail = () => {
   if (!singleTour) return null;
 
   const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete this tour?")) {
+    // Retaining window.confirm() but using toast for async result
+    if (window.confirm(`Are you sure you want to permanently delete the tour: "${singleTour.title}"?`)) {
       dispatch(deleteTour(singleTour._id))
         .unwrap()
         .then(() => {
-          alert("Tour deleted successfully!");
+          // Success Toast
+          toast.success(`Tour "${singleTour.title}" deleted successfully! 🗑️`, { theme: "colored" });
           navigate("/tours");
         })
-        .catch((err) => alert(err || "Failed to delete tour"));
+        .catch((err) => {
+          // Error Toast
+          const errorMessage = err?.message || "Failed to delete tour. Please try again.";
+          toast.error(errorMessage, { theme: "colored" });
+        });
     }
   };
 
@@ -152,5 +160,4 @@ const InfoCard = ({ icon, label, value }) => (
 );
 
 export default TourDetail;
-
 

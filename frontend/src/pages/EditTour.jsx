@@ -1,9 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTourById, updateTour } from "../features/tour/tourSlice";
 import { useParams, useNavigate } from "react-router-dom";
+// Import toast
+import { toast } from "react-toastify";
 
-// Reusable components
+
+// Reusable components (Left unchanged)
 const LabelWithIcon = ({ label, icon }) => (
   <label className="block text-lg font-semibold text-gray-700 mb-2 flex items-center space-x-2">
     <span className="text-2xl">{icon}</span>
@@ -102,7 +105,8 @@ const EditTour = () => {
     e.preventDefault();
 
     if (!title || !description || !location || !price || !availableSlots || !category || !subcategory) {
-      alert("Please fill in all fields.");
+      // Toast for missing fields
+      toast.error("Please fill in all required fields before updating the tour.", { theme: "colored" });
       return;
     }
 
@@ -121,10 +125,15 @@ const EditTour = () => {
 
     try {
       await dispatch(updateTour({ id, updatedData: formData })).unwrap();
-      alert("Tour updated successfully! ✅");
+
+      // Success Toast
+      toast.success("Tour updated successfully ✅", { theme: "colored" });
       navigate(`/tour/${id}`);
+
     } catch (err) {
-      alert(err || "Failed to update tour.");
+      // Error Toast
+      const errorMessage = err?.message || "Failed to update tour. Please try again.";
+      toast.error(errorMessage, { theme: "colored" });
     }
   };
 
@@ -270,4 +279,5 @@ const EditTour = () => {
 };
 
 export default EditTour;
+
 

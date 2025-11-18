@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { login, reset } from "../features/auth/authSlice";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
+// 1. Import toast
+import { toast } from "react-toastify";
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -16,11 +18,39 @@ const Login = () => {
   );
 
   useEffect(() => {
-    if (isSuccess || user) {
+    // 2. Check for success *before* navigating
+    if (isSuccess && user) {
+      // Assuming 'user' object has a 'name' property
+      toast.success(`Welcome back, ${user.name}`, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
       navigate("/");
     }
+
+    // 3. Display error toast if login failed
+    if (isError && message) {
+      toast.error(message, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
+    }
+
     dispatch(reset());
-  }, [user, isSuccess, navigate, dispatch]);
+    // Added 'message' and 'isError' to dependencies for error handling
+  }, [user, isSuccess, isError, message, navigate, dispatch]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -28,6 +58,11 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Basic client-side validation check
+    if (!email || !password) {
+      toast.error("Please enter both email and password.", { theme: "colored" });
+      return;
+    }
     dispatch(login({ email, password }));
   };
 
@@ -39,7 +74,7 @@ const Login = () => {
         className="bg-white shadow-2xl rounded-2xl p-8 w-full max-w-md"
       >
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Login</h2>
-        {isError && <p className="text-red-500 text-center mb-3">{message}</p>}
+        {/* Removed redundant isError message rendering here since toast will handle it */}
         <form onSubmit={handleSubmit} className="space-y-5">
           <input
             type="email"
@@ -60,7 +95,8 @@ const Login = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg"
+            className={`w-full text-white py-3 rounded-lg transition-colors ${isLoading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+              }`}
           >
             {isLoading ? "Logging in..." : "Login"}
           </button>
@@ -77,3 +113,7 @@ const Login = () => {
 };
 
 export default Login;
+
+
+
+

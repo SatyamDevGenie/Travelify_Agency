@@ -10,15 +10,15 @@ const Home = () => {
             {/* Hero Section */}
             <section
                 className="
-                    relative 
-                    h-[75vh] 
-                    md:h-[85vh] 
-                    lg:h-[90vh] 
-                    flex 
-                    items-center 
-                    justify-center 
-                    bg-cover 
-                    bg-center 
+                    relative
+                    h-[75vh]
+                    md:h-[85vh]
+                    lg:h-[90vh]
+                    flex
+                    items-center
+                    justify-center
+                    bg-cover
+                    bg-center
                     bg-no-repeat
                 "
                 style={{
@@ -46,18 +46,18 @@ const Home = () => {
 
                     <button
                         className="
-                            mt-6 
-                            bg-blue-600 
-                            hover:bg-blue-700 
-                            text-white 
-                            px-6 
-                            sm:px-8 
-                            py-3 
-                            rounded-full 
-                            font-semibold 
-                            text-sm 
-                            sm:text-base 
-                            transition 
+                            mt-6
+                            bg-blue-600
+                            hover:bg-blue-700
+                            text-white
+                            px-6
+                            sm:px-8
+                            py-3
+                            rounded-full
+                            font-semibold
+                            text-sm
+                            sm:text-base
+                            transition
                             shadow-lg
                         "
                     >

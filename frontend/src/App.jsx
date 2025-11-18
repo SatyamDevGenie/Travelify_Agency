@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; // Import the CSS
 
 // Components
 import Navbar from "./components/Navbar";
@@ -18,8 +20,26 @@ import CreateTour from "./pages/CreateTour";
 import EditTour from "./pages/EditTour";
 
 function App() {
+  // Use useEffect to trigger the toast when the component mounts
+  useEffect(() => {
+    // A fancy-looking toast (e.g., a success type)
+    toast.success("Welcome to Travelify! ✈️", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "colored", // Use a colored theme for a fancy look
+    });
+  }, []); // Empty dependency array ensures it runs only once on mount
+
   return (
     <Router>
+      {/* 1. Add the ToastContainer here, outside of the Routes */}
+      <ToastContainer />
+
       <Navbar />
 
       {/* Add padding for fixed navbar */}
@@ -45,7 +65,6 @@ function App() {
 
           {/* Update Tour */}
           <Route path="/edit-tour/:id" element={<EditTour />} />
-
 
         </Routes>
       </div>

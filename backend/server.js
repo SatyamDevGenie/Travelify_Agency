@@ -1,11 +1,13 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import http from "http"; // ⚠️ Important
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import tourRoutes from "./routes/tourRoutes.js";
-import bookingRoutes from "./routes/bookingRoutes.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
+
+
 
 dotenv.config();
 connectDB();
@@ -18,10 +20,12 @@ app.use(express.json());
 // Routes
 app.use("/api/users", authRoutes);
 app.use("/api/tours", tourRoutes);
-app.use("/api/bookings", bookingRoutes)
 
 // Example routes
 app.get("/", (req, res) => res.send("Travelify API is running..."));
+
+
+
 
 
 // 404 Middleware
