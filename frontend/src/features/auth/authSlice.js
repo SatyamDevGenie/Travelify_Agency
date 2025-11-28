@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 // Set base URL
-const API_URL = "http://localhost:5000/api/users";
+const API_URL = "https://travelify-agency.onrender.com/api/users";
 
 
 // Get user from localStorage

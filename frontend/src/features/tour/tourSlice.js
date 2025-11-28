@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 // Base API URL
-const API_URL = "http://localhost:5000/api/tours";
+const API_URL = "https://travelify-agency.onrender.com/api/tours";
 
 // ===============================
 // 🔹 FETCH ALL TOURS
