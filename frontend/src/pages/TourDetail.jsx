@@ -1,14 +1,15 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTourById, deleteTour } from "../features/tour/tourSlice";
 import { useParams, useNavigate } from "react-router-dom";
-// Import toast
 import { toast } from "react-toastify";
+import BookingModal from "../components/BookingModal";
 
 const TourDetail = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
 
   const { singleTour, singleLoading, singleError } = useSelector(
     (state) => state.tours
@@ -118,10 +119,36 @@ const TourDetail = () => {
                 </span>
               </p>
 
-              <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-xl shadow-lg hover:shadow-xl transition duration-300 transform hover:scale-[1.02] flex items-center justify-center space-x-2">
-                <span>🎟️</span>
-                <span>Book Your Adventure Now</span>
-              </button>
+              {user ? (
+                singleTour.availableSlots > 0 ? (
+                  <button
+                    onClick={() => setIsBookingModalOpen(true)}
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-xl shadow-lg hover:shadow-xl transition duration-300 transform hover:scale-[1.02] flex items-center justify-center space-x-2"
+                  >
+                    <span>🎟️</span>
+                    <span>Book Your Adventure Now</span>
+                  </button>
+                ) : (
+                  <button
+                    disabled
+                    className="w-full bg-gray-400 text-white font-bold text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-xl shadow-lg cursor-not-allowed flex items-center justify-center space-x-2"
+                  >
+                    <span>❌</span>
+                    <span>No Slots Available</span>
+                  </button>
+                )
+              ) : (
+                <button
+                  onClick={() => {
+                    toast.info("Please login to book a tour", { theme: "colored" });
+                    navigate("/login");
+                  }}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-xl shadow-lg hover:shadow-xl transition duration-300 transform hover:scale-[1.02] flex items-center justify-center space-x-2"
+                >
+                  <span>🔐</span>
+                  <span>Login to Book</span>
+                </button>
+              )}
 
               {/* Admin Controls */}
               {user?.isAdmin && (
@@ -144,6 +171,15 @@ const TourDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* Booking Modal */}
+      {isBookingModalOpen && (
+        <BookingModal
+          tour={singleTour}
+          isOpen={isBookingModalOpen}
+          onClose={() => setIsBookingModalOpen(false)}
+        />
+      )}
     </div>
   );
 };

@@ -74,9 +74,35 @@ const Navbar = () => {
                   <Link
                     to="/profile"
                     className="block px-5 py-3 hover:bg-indigo-50 rounded-lg"
+                    onClick={() => setOpenUser(false)}
                   >
                     Profile
                   </Link>
+                  <Link
+                    to="/my-bookings"
+                    className="block px-5 py-3 hover:bg-indigo-50 rounded-lg"
+                    onClick={() => setOpenUser(false)}
+                  >
+                    My Bookings
+                  </Link>
+                  {user.isAdmin && (
+                    <>
+                      <Link
+                        to="/create-tour"
+                        className="block px-5 py-3 hover:bg-indigo-50 rounded-lg"
+                        onClick={() => setOpenUser(false)}
+                      >
+                        Create Tour
+                      </Link>
+                      <Link
+                        to="/admin/bookings"
+                        className="block px-5 py-3 hover:bg-indigo-50 rounded-lg"
+                        onClick={() => setOpenUser(false)}
+                      >
+                        Manage Bookings
+                      </Link>
+                    </>
+                  )}
                   <button
                     onClick={handleLogout}
                     className="w-full text-left px-5 py-3 text-red-600 hover:bg-red-50 font-medium rounded-lg"
@@ -133,6 +159,31 @@ const Navbar = () => {
               >
                 Profile
               </Link>
+              <Link
+                to="/my-bookings"
+                onClick={() => setOpenMenu(false)}
+                className="block text-lg font-semibold text-gray-700 hover:text-indigo-600"
+              >
+                My Bookings
+              </Link>
+              {user.isAdmin && (
+                <>
+                  <Link
+                    to="/create-tour"
+                    onClick={() => setOpenMenu(false)}
+                    className="block text-lg font-semibold text-gray-700 hover:text-indigo-600"
+                  >
+                    Create Tour
+                  </Link>
+                  <Link
+                    to="/admin/bookings"
+                    onClick={() => setOpenMenu(false)}
+                    className="block text-lg font-semibold text-gray-700 hover:text-indigo-600"
+                  >
+                    Manage Bookings
+                  </Link>
+                </>
+              )}
               <button
                 onClick={handleLogout}
                 className="block w-full text-left text-lg text-red-600 font-semibold hover:text-red-700"

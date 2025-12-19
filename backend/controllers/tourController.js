@@ -1,4 +1,4 @@
-import Tour from "../models/Tour.js";
+import Tour from "../models/tourModel.js";
 import cloudinary from "../config/cloudinary.js";
 import fs from "fs";
 

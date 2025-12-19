@@ -18,6 +18,8 @@ import Profile from "./pages/Profile";
 import TourDetail from "./pages/TourDetail";
 import CreateTour from "./pages/CreateTour";
 import EditTour from "./pages/EditTour";
+import MyBookings from "./pages/MyBookings";
+import AdminBookings from "./pages/AdminBookings";
 
 function App() {
   // Use useEffect to trigger the toast when the component mounts
@@ -65,6 +67,10 @@ function App() {
 
           {/* Update Tour */}
           <Route path="/edit-tour/:id" element={<EditTour />} />
+
+          {/* Bookings */}
+          <Route path="/my-bookings" element={<MyBookings />} />
+          <Route path="/admin/bookings" element={<AdminBookings />} />
 
         </Routes>
       </div>
