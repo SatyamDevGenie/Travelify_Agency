@@ -49,6 +49,12 @@ const BookingModal = ({ tour, isOpen, onClose }) => {
     const handleCreateOrder = async (e) => {
         e.preventDefault();
 
+        // Check if user is logged in
+        if (!user || !user.token) {
+            toast.error("Please login to book a tour", { theme: "colored" });
+            return;
+        }
+
         // Validate form
         if (!formData.name || !formData.email || !formData.phone) {
             toast.error("Please fill all fields", { theme: "colored" });
@@ -64,17 +70,19 @@ const BookingModal = ({ tour, isOpen, onClose }) => {
         }
 
         try {
-            await dispatch(
+            const orderResult = await dispatch(
                 createBookingOrder({
                     tourId: tour._id,
                     numberOfGuests: parseInt(formData.numberOfGuests),
                 })
             ).unwrap();
 
+            console.log("Order created successfully:", orderResult);
             toast.success("Order created. Please proceed with payment.", {
                 theme: "colored",
             });
         } catch (error) {
+            console.error("Order creation error:", error);
             toast.error(error || "Failed to create order", { theme: "colored" });
         }
     };
@@ -85,12 +93,28 @@ const BookingModal = ({ tour, isOpen, onClose }) => {
             return;
         }
 
+        // Get Razorpay key from order (sent by backend) or environment variable
+        const razorpayKey = order.razorpayKeyId || import.meta.env.VITE_RAZORPAY_KEY_ID;
+        
+        if (!razorpayKey) {
+            toast.error(
+                "Payment gateway not configured. Please contact administrator.",
+                { theme: "colored", autoClose: 5000 }
+            );
+            return;
+        }
+
         try {
             // Load Razorpay script
             await loadRazorpay();
 
+            if (!window.Razorpay) {
+                toast.error("Failed to load Razorpay payment gateway", { theme: "colored" });
+                return;
+            }
+
             const options = {
-                key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+                key: razorpayKey,
                 amount: order.amount,
                 currency: order.currency,
                 name: "Travelify",
@@ -99,6 +123,16 @@ const BookingModal = ({ tour, isOpen, onClose }) => {
                 handler: async function (response) {
                     // Verify payment on backend
                     try {
+                        console.log("Payment success response:", response);
+                        
+                        // Validate response
+                        if (!response.razorpay_payment_id || !response.razorpay_order_id || !response.razorpay_signature) {
+                            toast.error("Invalid payment response. Please contact support.", {
+                                theme: "colored",
+                            });
+                            return;
+                        }
+
                         await dispatch(
                             verifyPaymentAndBook({
                                 orderId: response.razorpay_order_id,
@@ -119,9 +153,12 @@ const BookingModal = ({ tour, isOpen, onClose }) => {
                         });
                         dispatch(clearOrder());
                         onClose();
-                        // Refresh page or navigate
-                        window.location.reload();
+                        // Navigate to My Bookings page
+                        setTimeout(() => {
+                            window.location.href = "/my-bookings";
+                        }, 1000);
                     } catch (error) {
+                        console.error("Payment verification error:", error);
                         toast.error(error || "Payment verification failed", {
                             theme: "colored",
                         });
@@ -143,9 +180,26 @@ const BookingModal = ({ tour, isOpen, onClose }) => {
             };
 
             const razorpay = new window.Razorpay(options);
+            
+            // Add error event listener
+            razorpay.on('payment.failed', function(response) {
+                console.error("Payment failed:", response);
+                const errorMsg = response.error?.description || response.error?.reason || response.error?.code || "Payment failed. Please try again.";
+                toast.error(`Payment failed: ${errorMsg}`, { 
+                    theme: "colored", 
+                    autoClose: 5000 
+                });
+            });
+
+            // Handle payment errors
+            razorpay.on('payment.authorized', function(response) {
+                console.log("Payment authorized:", response);
+            });
+
             razorpay.open();
         } catch (error) {
-            toast.error("Failed to load payment gateway", { theme: "colored" });
+            console.error("Razorpay initialization error:", error);
+            toast.error("Failed to load payment gateway. Please try again.", { theme: "colored" });
         }
     };
 

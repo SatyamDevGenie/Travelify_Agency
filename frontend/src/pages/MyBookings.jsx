@@ -14,8 +14,20 @@ const MyBookings = () => {
             navigate("/login");
             return;
         }
+        // Fetch bookings when component mounts
         dispatch(fetchMyBookings());
     }, [dispatch, user, navigate]);
+
+    // Refresh bookings when navigating to this page
+    useEffect(() => {
+        const handleFocus = () => {
+            if (user) {
+                dispatch(fetchMyBookings());
+            }
+        };
+        window.addEventListener('focus', handleFocus);
+        return () => window.removeEventListener('focus', handleFocus);
+    }, [dispatch, user]);
 
     const getStatusBadge = (status) => {
         const badges = {

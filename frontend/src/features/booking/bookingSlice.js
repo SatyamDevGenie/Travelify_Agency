@@ -4,13 +4,25 @@ import axios from "axios";
 // Base API URL
 const API_URL = "http://localhost:5000/api/bookings";
 
-// Get token from localStorage
-const getAuthToken = () => {
+// Get token from localStorage or Redux state
+const getAuthToken = (getState) => {
     try {
-        const user = localStorage.getItem("user");
-        if (user) {
-            const parsed = JSON.parse(user);
-            return parsed.token || null;
+        // First try to get from localStorage
+        const userStr = localStorage.getItem("user");
+        if (userStr) {
+            const parsed = JSON.parse(userStr);
+            if (parsed.token) {
+                return parsed.token;
+            }
+        }
+        
+        // Fallback: try to get from Redux state if available
+        if (getState) {
+            const state = getState();
+            const user = state?.auth?.user;
+            if (user?.token) {
+                return user.token;
+            }
         }
     } catch (error) {
         console.error("Error getting auth token:", error);
@@ -51,21 +63,37 @@ export const createBookingOrder = createAsyncThunk(
     "booking/createOrder",
     async (orderData, thunkAPI) => {
         try {
-            // Get token fresh from localStorage
-            const token = getAuthToken();
+            // Get token fresh from localStorage or Redux
+            const token = getAuthToken(thunkAPI.getState);
             if (!token) {
                 return thunkAPI.rejectWithValue("Please login to book a tour");
             }
 
-            const response = await axiosWithAuth.post("/create-order", orderData, {
+            const response = await axios.post(`${API_URL}/create-order`, orderData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
                 },
             });
             return response.data;
         } catch (error) {
-            const errorMessage = error.response?.data?.message || error.message || "Error creating order";
-            console.error("Booking order error:", errorMessage);
+            // Get detailed error message
+            let errorMessage = "Error creating order";
+            
+            if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+            
+            // Log full error for debugging
+            console.error("Booking order error:", {
+                message: errorMessage,
+                status: error.response?.status,
+                data: error.response?.data,
+                fullError: error
+            });
+            
             return thunkAPI.rejectWithValue(errorMessage);
         }
     }
@@ -76,15 +104,16 @@ export const verifyPaymentAndBook = createAsyncThunk(
     "booking/verifyPayment",
     async (paymentData, thunkAPI) => {
         try {
-            // Get token fresh from localStorage
-            const token = getAuthToken();
+            // Get token fresh from localStorage or Redux
+            const token = getAuthToken(thunkAPI.getState);
             if (!token) {
                 return thunkAPI.rejectWithValue("Please login to complete booking");
             }
 
-            const response = await axiosWithAuth.post("/verify-payment", paymentData, {
+            const response = await axios.post(`${API_URL}/verify-payment`, paymentData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
                 },
             });
             return response.data;
@@ -101,12 +130,12 @@ export const fetchMyBookings = createAsyncThunk(
     "booking/fetchMyBookings",
     async (_, thunkAPI) => {
         try {
-            const token = getAuthToken();
+            const token = getAuthToken(thunkAPI.getState);
             if (!token) {
                 return thunkAPI.rejectWithValue("Please login to view bookings");
             }
 
-            const response = await axiosWithAuth.get("/my-bookings", {
+            const response = await axios.get(`${API_URL}/my-bookings`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -125,12 +154,12 @@ export const fetchAllBookings = createAsyncThunk(
     "booking/fetchAllBookings",
     async (_, thunkAPI) => {
         try {
-            const token = getAuthToken();
+            const token = getAuthToken(thunkAPI.getState);
             if (!token) {
                 return thunkAPI.rejectWithValue("Please login");
             }
 
-            const response = await axiosWithAuth.get("/all/bookings", {
+            const response = await axios.get(`${API_URL}/all/bookings`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -149,12 +178,12 @@ export const fetchBookingById = createAsyncThunk(
     "booking/fetchBookingById",
     async (bookingId, thunkAPI) => {
         try {
-            const token = getAuthToken();
+            const token = getAuthToken(thunkAPI.getState);
             if (!token) {
                 return thunkAPI.rejectWithValue("Please login");
             }
 
-            const response = await axiosWithAuth.get(`/${bookingId}`, {
+            const response = await axios.get(`${API_URL}/${bookingId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -173,12 +202,12 @@ export const confirmBooking = createAsyncThunk(
     "booking/confirmBooking",
     async (bookingId, thunkAPI) => {
         try {
-            const token = getAuthToken();
+            const token = getAuthToken(thunkAPI.getState);
             if (!token) {
                 return thunkAPI.rejectWithValue("Please login");
             }
 
-            const response = await axiosWithAuth.put(`/${bookingId}/confirm`, {}, {
+            const response = await axios.put(`${API_URL}/${bookingId}/confirm`, {}, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -197,7 +226,16 @@ export const cancelBooking = createAsyncThunk(
     "booking/cancelBooking",
     async (bookingId, thunkAPI) => {
         try {
-            const response = await axiosWithAuth.put(`/${bookingId}/cancel`);
+            const token = getAuthToken(thunkAPI.getState);
+            if (!token) {
+                return thunkAPI.rejectWithValue("Please login");
+            }
+
+            const response = await axios.put(`${API_URL}/${bookingId}/cancel`, {}, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
             return response.data;
         } catch (error) {
             return thunkAPI.rejectWithValue(
@@ -256,7 +294,10 @@ const bookingSlice = createSlice({
             .addCase(verifyPaymentAndBook.fulfilled, (state, action) => {
                 state.loading = false;
                 state.order = null;
-                // Refresh bookings list
+                // Add new booking to the list
+                if (action.payload?.booking) {
+                    state.bookings.unshift(action.payload.booking);
+                }
             })
             .addCase(verifyPaymentAndBook.rejected, (state, action) => {
                 state.loading = false;

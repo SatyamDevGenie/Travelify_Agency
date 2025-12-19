@@ -60,13 +60,19 @@ export const createOrder = async (req, res) => {
             });
         }
 
-        const totalAmount = tour.price * numberOfGuests * 100; // Convert to paise
+        // Calculate total amount in paise (Razorpay requires amount in smallest currency unit)
+        // Minimum amount is 100 paise (₹1) for Razorpay
+        // Ensure amount is an integer
+        const totalAmountPaise = Math.max(Math.round(tour.price * numberOfGuests * 100), 100);
 
         // Create Razorpay order
+        // Receipt must be max 40 characters, so we'll use a shorter format
+        const receiptId = `B${Date.now()}${userId.toString().slice(-6)}`.slice(0, 40);
+        
         const options = {
-            amount: totalAmount,
+            amount: totalAmountPaise, // Must be integer in paise
             currency: "INR",
-            receipt: `booking_${Date.now()}_${userId}`,
+            receipt: receiptId,
             notes: {
                 tourId: tourId.toString(),
                 userId: userId.toString(),
@@ -74,26 +80,54 @@ export const createOrder = async (req, res) => {
             },
         };
 
+        console.log("Creating Razorpay order with:", {
+            amount: totalAmountPaise,
+            currency: options.currency,
+            receipt: receiptId
+        });
+
         const order = await razorpay.orders.create(options);
+        
+        console.log("Razorpay order created:", order.id);
 
         res.status(201).json({
             success: true,
             orderId: order.id,
-            amount: order.amount,
+            amount: parseInt(order.amount), // Ensure it's an integer
             currency: order.currency,
+            razorpayKeyId: process.env.RAZORPAY_KEY_ID, // Send key ID to frontend
             tour: {
                 _id: tour._id,
                 title: tour.title,
                 price: tour.price,
             },
             numberOfGuests,
-            totalAmount: totalAmount / 100,
+            totalAmount: totalAmountPaise / 100,
         });
     } catch (error) {
         console.error("Error creating order:", error);
+        
+        // Provide more specific error messages
+        let errorMessage = "Error creating payment order";
+        
+        if (error.error && error.error.description) {
+            errorMessage = error.error.description;
+        } else if (error.message) {
+            errorMessage = error.message;
+        }
+        
+        // Check if it's a Razorpay authentication error
+        if (error.statusCode === 401 || errorMessage.includes("key") || errorMessage.includes("authentication")) {
+            errorMessage = "Razorpay authentication failed. Please check your RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in .env file";
+        }
+        
         res.status(500).json({ 
-            message: "Error creating payment order",
-            error: process.env.NODE_ENV === "development" ? error.message : undefined
+            message: errorMessage,
+            error: process.env.NODE_ENV === "development" ? {
+                message: error.message,
+                statusCode: error.statusCode,
+                error: error.error
+            } : undefined
         });
     }
 };
