@@ -73,6 +73,7 @@ export const createOrder = async (req, res) => {
             amount: totalAmountPaise, // Must be integer in paise
             currency: "INR",
             receipt: receiptId,
+            payment_capture: 1, // Auto capture payment
             notes: {
                 tourId: tourId.toString(),
                 userId: userId.toString(),
@@ -167,14 +168,18 @@ export const verifyPayment = async (req, res) => {
             });
         }
 
-        // Verify payment signature
-        const generatedSignature = crypto
-            .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-            .update(`${orderId}|${paymentId}`)
-            .digest("hex");
+        // Verify payment signature (skip for mock payments)
+        if (!signature.startsWith('mock_signature_')) {
+            const generatedSignature = crypto
+                .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+                .update(`${orderId}|${paymentId}`)
+                .digest("hex");
 
-        if (generatedSignature !== signature) {
-            return res.status(400).json({ message: "Invalid payment signature" });
+            if (generatedSignature !== signature) {
+                return res.status(400).json({ message: "Invalid payment signature" });
+            }
+        } else {
+            console.log("Mock payment detected, skipping signature verification");
         }
 
         // Get tour details
@@ -404,6 +409,8 @@ Travelify Team
  */
 export const cancelBooking = async (req, res) => {
     try {
+        const { rejectionReason } = req.body; // Get rejection reason from request body
+        
         const booking = await Booking.findById(req.params.id)
             .populate("tour", "title location")
             .populate("user", "name email");
@@ -419,6 +426,7 @@ export const cancelBooking = async (req, res) => {
         // Update booking status
         booking.bookingStatus = "cancelled";
         booking.paymentStatus = "refunded";
+        booking.rejectionReason = rejectionReason || "Booking cancelled by admin"; // Store rejection reason
         await booking.save();
 
         // Return slots to tour
@@ -428,7 +436,7 @@ export const cancelBooking = async (req, res) => {
             await tour.save();
         }
 
-        // Send cancellation email to user
+        // Send cancellation email to user with custom reason
         const emailSubject = "Booking Cancelled - Travelify";
         const emailText = `
 Dear ${booking.guestDetails.name},
@@ -444,11 +452,14 @@ Booking Details:
 - Booking Status: Cancelled ❌
 - Payment Status: Refunded
 
+Reason for Cancellation:
+${rejectionReason || "No specific reason provided."}
+
 Your payment will be refunded to your original payment method within 5-7 business days.
 
 If you have any questions or concerns, please feel free to contact us.
 
-We apologize for any inconvenience caused.
+We apologize for any inconvenience caused and hope to serve you better in the future.
 
 Best regards,
 Travelify Team
@@ -471,3 +482,103 @@ Travelify Team
     }
 };
 
+
+/**
+ * @desc    Create direct booking without payment
+ * @route   POST /api/bookings/direct-booking
+ * @access  Private
+ */
+export const createDirectBooking = async (req, res) => {
+    try {
+        // Check if user is authenticated
+        if (!req.user || !req.user._id) {
+            return res.status(401).json({ message: "User not authenticated" });
+        }
+
+        const { tourId, numberOfGuests, guestDetails } = req.body;
+        const userId = req.user._id;
+
+        // Validate input
+        if (!tourId || !numberOfGuests || numberOfGuests < 1 || !guestDetails) {
+            return res.status(400).json({ message: "Tour ID, number of guests, and guest details are required" });
+        }
+
+        // Validate guest details
+        if (!guestDetails.name || !guestDetails.email) {
+            return res.status(400).json({ message: "Guest name and email are required" });
+        }
+
+        // Get tour details
+        const tour = await Tour.findById(tourId);
+        if (!tour) {
+            return res.status(404).json({ message: "Tour not found" });
+        }
+
+        // Check available slots
+        if (tour.availableSlots < numberOfGuests) {
+            return res.status(400).json({ 
+                message: `Only ${tour.availableSlots} slots available` 
+            });
+        }
+
+        const totalAmount = tour.price * numberOfGuests;
+
+        // Create booking without payment
+        const booking = await Booking.create({
+            tour: tourId,
+            user: userId,
+            numberOfGuests,
+            totalAmount,
+            paymentStatus: "pending", // No payment required
+            bookingStatus: "confirmed", // Directly confirmed
+            guestDetails,
+        });
+
+        // Update tour available slots
+        tour.availableSlots -= numberOfGuests;
+        await tour.save();
+
+        // Populate booking details
+        await booking.populate("tour", "title location price image");
+        await booking.populate("user", "name email");
+
+        // Send confirmation email to user
+        const emailSubject = "Booking Confirmation - Travelify";
+        const emailText = `
+Dear ${guestDetails.name},
+
+Thank you for booking with Travelify!
+
+Your booking details:
+- Tour: ${tour.title}
+- Location: ${tour.location}
+- Number of Guests: ${numberOfGuests}
+- Total Amount: ₹${totalAmount.toLocaleString("en-IN")}
+- Booking ID: ${booking._id}
+- Booking Status: Confirmed ✅
+
+Your booking has been confirmed successfully! We look forward to serving you on this amazing journey.
+
+If you have any questions, please feel free to contact us.
+
+Best regards,
+Travelify Team
+        `;
+
+        try {
+            await sendEmail(guestDetails.email, emailSubject, emailText);
+        } catch (emailError) {
+            console.error("Error sending email:", emailError);
+            // Don't fail the booking if email fails
+        }
+
+        res.status(201).json({
+            success: true,
+            message: "Booking created successfully!",
+            booking,
+        });
+    } catch (error) {
+        console.error("Error creating direct booking:", error);
+        res.status(500).json({ message: "Error creating booking" });
+    }
+};

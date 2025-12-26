@@ -215,8 +215,17 @@ const MyBookings = () => {
                                         {booking.bookingStatus === "cancelled" && (
                                             <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-3">
                                                 <p className="text-sm text-red-800">
-                                                    ❌ Your booking has been cancelled. Refund will be processed within
-                                                    5-7 business days.
+                                                    ❌ Your booking has been cancelled.
+                                                </p>
+                                                {booking.rejectionReason && (
+                                                    <div className="mt-2 p-2 bg-red-100 rounded">
+                                                        <p className="text-xs text-red-700">
+                                                            <strong>Reason:</strong> {booking.rejectionReason}
+                                                        </p>
+                                                    </div>
+                                                )}
+                                                <p className="text-xs text-red-600 mt-1">
+                                                    Refund will be processed within 5-7 business days.
                                                 </p>
                                             </div>
                                         )}

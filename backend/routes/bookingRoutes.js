@@ -2,6 +2,7 @@ import express from "express";
 import {
     createOrder,
     verifyPayment,
+    createDirectBooking,
     getMyBookings,
     getAllBookings,
     getBookingById,
@@ -15,6 +16,7 @@ const router = express.Router();
 // User routes (specific routes first)
 router.post("/create-order", protect, createOrder);
 router.post("/verify-payment", protect, verifyPayment);
+router.post("/direct-booking", protect, createDirectBooking);
 router.get("/my-bookings", protect, getMyBookings);
 
 // Admin routes (specific routes first)

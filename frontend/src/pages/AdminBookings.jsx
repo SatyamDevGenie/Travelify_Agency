@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -7,12 +7,16 @@ import {
     confirmBooking,
     cancelBooking,
 } from "../features/booking/bookingSlice";
+import RejectBookingModal from "../components/RejectBookingModal";
 
 const AdminBookings = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { user } = useSelector((state) => state.auth);
     const { allBookings, loading, error } = useSelector((state) => state.booking);
+    
+    const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+    const [selectedBooking, setSelectedBooking] = useState(null);
 
     useEffect(() => {
         if (!user) {
@@ -39,19 +43,18 @@ const AdminBookings = () => {
         }
     };
 
-    const handleCancel = async (bookingId) => {
-        if (
-            window.confirm(
-                "Are you sure you want to cancel this booking? The user will be notified and refunded."
-            )
-        ) {
-            try {
-                await dispatch(cancelBooking(bookingId)).unwrap();
-                toast.success("Booking cancelled successfully!", { theme: "colored" });
-                dispatch(fetchAllBookings()); // Refresh list
-            } catch (error) {
-                toast.error(error || "Failed to cancel booking", { theme: "colored" });
-            }
+    const handleCancel = (booking) => {
+        setSelectedBooking(booking);
+        setIsRejectModalOpen(true);
+    };
+
+    const handleRejectBooking = async (bookingId, rejectionReason) => {
+        try {
+            await dispatch(cancelBooking({ bookingId, rejectionReason })).unwrap();
+            toast.success("Booking rejected successfully!", { theme: "colored" });
+            dispatch(fetchAllBookings()); // Refresh list
+        } catch (error) {
+            toast.error(error || "Failed to reject booking", { theme: "colored" });
         }
     };
 
@@ -244,19 +247,19 @@ const AdminBookings = () => {
                                                         ✅ Confirm Booking
                                                     </button>
                                                     <button
-                                                        onClick={() => handleCancel(booking._id)}
+                                                        onClick={() => handleCancel(booking)}
                                                         className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-2 rounded-lg transition"
                                                     >
-                                                        ❌ Cancel Booking
+                                                        ❌ Reject Booking
                                                     </button>
                                                 </>
                                             )}
                                             {booking.bookingStatus === "confirmed" && (
                                                 <button
-                                                    onClick={() => handleCancel(booking._id)}
+                                                    onClick={() => handleCancel(booking)}
                                                     className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-2 rounded-lg transition"
                                                 >
-                                                    ❌ Cancel Booking
+                                                    ❌ Reject Booking
                                                 </button>
                                             )}
                                             {booking.bookingStatus === "cancelled" && (
@@ -272,9 +275,18 @@ const AdminBookings = () => {
                     </div>
                 )}
             </div>
+
+            {/* Rejection Modal */}
+            <RejectBookingModal
+                isOpen={isRejectModalOpen}
+                onClose={() => setIsRejectModalOpen(false)}
+                onReject={handleRejectBooking}
+                booking={selectedBooking}
+            />
         </div>
     );
 };
 
 export default AdminBookings;
+
 

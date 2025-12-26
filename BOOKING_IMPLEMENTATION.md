@@ -219,3 +219,4 @@ All emails include:
 - Slots are automatically managed (decrease on booking, increase on cancellation)
 - Users receive immediate email notifications on status changes
 
+

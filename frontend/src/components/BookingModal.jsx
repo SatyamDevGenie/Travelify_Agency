@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import {
     createBookingOrder,
     verifyPaymentAndBook,
+    createDirectBooking,
     clearOrder,
 } from "../features/booking/bookingSlice";
 import { loadRazorpay } from "../utils/razorpay";
@@ -21,6 +22,12 @@ const BookingModal = ({ tour, isOpen, onClose }) => {
         email: user?.email || "",
         phone: "",
     });
+
+    const [bookingType, setBookingType] = useState("payment"); // "direct" or "payment" - default to payment to show test mode
+    const [useMockPayment, setUseMockPayment] = useState(true); // Enable mock payment by default
+
+    // Debug log
+    console.log("BookingModal - Current booking type:", bookingType);
 
     useEffect(() => {
         if (orderError) {
@@ -44,6 +51,56 @@ const BookingModal = ({ tour, isOpen, onClose }) => {
             ...formData,
             [e.target.name]: e.target.value,
         });
+    };
+
+    const handleDirectBooking = async (e) => {
+        e.preventDefault();
+
+        // Check if user is logged in
+        if (!user || !user.token) {
+            toast.error("Please login to book a tour", { theme: "colored" });
+            return;
+        }
+
+        // Validate form
+        if (!formData.name || !formData.email || !formData.phone) {
+            toast.error("Please fill all fields", { theme: "colored" });
+            return;
+        }
+
+        if (formData.numberOfGuests < 1 || formData.numberOfGuests > tour.availableSlots) {
+            toast.error(
+                `Number of guests must be between 1 and ${tour.availableSlots}`,
+                { theme: "colored" }
+            );
+            return;
+        }
+
+        try {
+            await dispatch(
+                createDirectBooking({
+                    tourId: tour._id,
+                    numberOfGuests: parseInt(formData.numberOfGuests),
+                    guestDetails: {
+                        name: formData.name,
+                        email: formData.email,
+                        phone: formData.phone,
+                    },
+                })
+            ).unwrap();
+
+            toast.success("Booking confirmed! Check your email for details.", {
+                theme: "colored",
+            });
+            onClose();
+            // Navigate to My Bookings page
+            setTimeout(() => {
+                window.location.href = "/my-bookings";
+            }, 1000);
+        } catch (error) {
+            console.error("Direct booking error:", error);
+            toast.error(error || "Failed to create booking", { theme: "colored" });
+        }
     };
 
     const handleCreateOrder = async (e) => {
@@ -87,6 +144,59 @@ const BookingModal = ({ tour, isOpen, onClose }) => {
         }
     };
 
+    const handleMockPayment = async () => {
+        if (!order) {
+            toast.error("Please create order first", { theme: "colored" });
+            return;
+        }
+
+        try {
+            // Simulate payment processing
+            toast.info("Processing mock payment...", { theme: "colored" });
+            
+            // Wait 2 seconds to simulate payment processing
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Create mock payment response
+            const mockPaymentResponse = {
+                razorpay_order_id: order.orderId,
+                razorpay_payment_id: `pay_mock_${Date.now()}`,
+                razorpay_signature: `mock_signature_${Date.now()}`
+            };
+
+            // Verify mock payment on backend
+            await dispatch(
+                verifyPaymentAndBook({
+                    orderId: mockPaymentResponse.razorpay_order_id,
+                    paymentId: mockPaymentResponse.razorpay_payment_id,
+                    signature: mockPaymentResponse.razorpay_signature,
+                    tourId: tour._id,
+                    numberOfGuests: parseInt(formData.numberOfGuests),
+                    guestDetails: {
+                        name: formData.name,
+                        email: formData.email,
+                        phone: formData.phone,
+                    },
+                })
+            ).unwrap();
+
+            toast.success("Mock payment successful! Booking confirmed.", {
+                theme: "colored",
+            });
+            dispatch(clearOrder());
+            onClose();
+            // Navigate to My Bookings page
+            setTimeout(() => {
+                window.location.href = "/my-bookings";
+            }, 1000);
+        } catch (error) {
+            console.error("Mock payment error:", error);
+            toast.error(error || "Mock payment failed", {
+                theme: "colored",
+            });
+        }
+    };
+
     const handlePayment = async () => {
         if (!order) {
             toast.error("Please create order first", { theme: "colored" });
@@ -120,6 +230,12 @@ const BookingModal = ({ tour, isOpen, onClose }) => {
                 name: "Travelify",
                 description: `Booking for ${order.tour.title}`,
                 order_id: order.orderId,
+                method: {
+                    card: true,
+                    netbanking: true,
+                    wallet: true,
+                    upi: true
+                },
                 handler: async function (response) {
                     // Verify payment on backend
                     try {
@@ -184,10 +300,20 @@ const BookingModal = ({ tour, isOpen, onClose }) => {
             // Add error event listener
             razorpay.on('payment.failed', function(response) {
                 console.error("Payment failed:", response);
-                const errorMsg = response.error?.description || response.error?.reason || response.error?.code || "Payment failed. Please try again.";
+                let errorMsg = "Payment failed. Please try again.";
+                
+                if (response.error?.description) {
+                    errorMsg = response.error.description;
+                    
+                    // Handle international card error specifically
+                    if (errorMsg.includes("International cards are not supported")) {
+                        errorMsg = "Please use Indian test cards: 5555 5555 5555 4444 (Mastercard) or 4000 0035 6000 0008 (Visa India)";
+                    }
+                }
+                
                 toast.error(`Payment failed: ${errorMsg}`, { 
                     theme: "colored", 
-                    autoClose: 5000 
+                    autoClose: 8000 
                 });
             });
 
@@ -248,7 +374,90 @@ const BookingModal = ({ tour, isOpen, onClose }) => {
 
                     {/* Booking Form */}
                     {!order ? (
-                        <form onSubmit={handleCreateOrder} className="space-y-4">
+                        <form onSubmit={bookingType === "direct" ? handleDirectBooking : handleCreateOrder} className="space-y-4">
+                            {/* Booking Type Selection - PROMINENT */}
+                            <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-6 rounded-xl border-2 border-indigo-200">
+                                <h3 className="text-lg font-bold text-gray-800 mb-4 text-center">
+                                    🎯 Choose Your Booking Method
+                                </h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <label className="flex items-center p-4 bg-white rounded-lg border-2 border-gray-200 hover:border-green-400 cursor-pointer transition-all">
+                                        <input
+                                            type="radio"
+                                            name="bookingType"
+                                            value="direct"
+                                            checked={bookingType === "direct"}
+                                            onChange={(e) => setBookingType(e.target.value)}
+                                            className="mr-3 text-green-600 scale-125"
+                                        />
+                                        <div>
+                                            <span className="text-sm font-bold text-gray-800 block">
+                                                ✅ Book Now (Free)
+                                            </span>
+                                            <span className="text-xs text-gray-600">
+                                                No payment required
+                                            </span>
+                                        </div>
+                                    </label>
+                                    <label className="flex items-center p-4 bg-white rounded-lg border-2 border-gray-200 hover:border-indigo-400 cursor-pointer transition-all">
+                                        <input
+                                            type="radio"
+                                            name="bookingType"
+                                            value="payment"
+                                            checked={bookingType === "payment"}
+                                            onChange={(e) => setBookingType(e.target.value)}
+                                            className="mr-3 text-indigo-600 scale-125"
+                                        />
+                                        <div>
+                                            <span className="text-sm font-bold text-gray-800 block">
+                                                💳 Pay with Card (Test)
+                                            </span>
+                                            <span className="text-xs text-gray-600">
+                                                Dummy payment mode
+                                            </span>
+                                        </div>
+                                    </label>
+                                </div>
+                                {bookingType === "payment" && (
+                                    <div className="mt-4 space-y-3">
+                                        <div className="p-4 bg-green-100 border border-green-300 rounded-lg">
+                                            <div className="flex items-center mb-2">
+                                                <input
+                                                    type="checkbox"
+                                                    id="mockPayment"
+                                                    checked={useMockPayment}
+                                                    onChange={(e) => setUseMockPayment(e.target.checked)}
+                                                    className="mr-2 text-green-600"
+                                                />
+                                                <label htmlFor="mockPayment" className="text-sm font-bold text-green-900">
+                                                    🎭 Use Mock Payment (Recommended)
+                                                </label>
+                                            </div>
+                                            <p className="text-xs text-green-800">
+                                                Simulates payment without Razorpay gateway. Perfect for testing!
+                                            </p>
+                                        </div>
+                                        
+                                        {!useMockPayment && (
+                                            <div className="p-4 bg-blue-100 border border-blue-300 rounded-lg">
+                                                <p className="text-sm text-blue-900 font-medium">
+                                                    🧪 <strong>REAL RAZORPAY TEST MODE</strong>
+                                                </p>
+                                                <p className="text-xs text-blue-800 mt-1">
+                                                    <strong>Test Payment Options:</strong><br/>
+                                                    <strong>1. Indian Cards:</strong><br/>
+                                                    • Mastercard: <code className="bg-blue-200 px-1 rounded">5555 5555 5555 4444</code><br/>
+                                                    • Visa India: <code className="bg-blue-200 px-1 rounded">4000 0035 6000 0008</code><br/>
+                                                    CVV: <code className="bg-blue-200 px-1 rounded">123</code>, Expiry: <code className="bg-blue-200 px-1 rounded">12/25</code><br/>
+                                                    <strong>2. UPI (Recommended):</strong><br/>
+                                                    • Success: <code className="bg-blue-200 px-1 rounded">success@razorpay</code><br/>
+                                                    • Failure: <code className="bg-blue-200 px-1 rounded">failure@razorpay</code>
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Number of Guests *
@@ -329,10 +538,23 @@ const BookingModal = ({ tour, isOpen, onClose }) => {
                                 </button>
                                 <button
                                     type="submit"
-                                    disabled={orderLoading}
-                                    className="flex-1 px-6 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled={loading || orderLoading}
+                                    className="flex-1 px-6 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                 >
-                                    {orderLoading ? "Creating Order..." : "Proceed to Payment"}
+                                    {loading || orderLoading ? (
+                                        <>
+                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                            Processing...
+                                        </>
+                                    ) : bookingType === "direct" ? (
+                                        <>
+                                            ✅ Book Now (Free)
+                                        </>
+                                    ) : (
+                                        <>
+                                            💳 Proceed to Test Payment
+                                        </>
+                                    )}
                                 </button>
                             </div>
                         </form>
@@ -369,11 +591,24 @@ const BookingModal = ({ tour, isOpen, onClose }) => {
                                     Back
                                 </button>
                                 <button
-                                    onClick={handlePayment}
+                                    onClick={useMockPayment ? handleMockPayment : handlePayment}
                                     disabled={loading}
-                                    className="flex-1 px-6 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="flex-1 px-6 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                 >
-                                    {loading ? "Processing..." : "Pay Now"}
+                                    {loading ? (
+                                        <>
+                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                            Processing...
+                                        </>
+                                    ) : useMockPayment ? (
+                                        <>
+                                            🎭 Pay Now (Mock)
+                                        </>
+                                    ) : (
+                                        <>
+                                            💳 Pay Now (Razorpay)
+                                        </>
+                                    )}
                                 </button>
                             </div>
                         </div>

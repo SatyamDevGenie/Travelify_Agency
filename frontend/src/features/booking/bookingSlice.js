@@ -125,6 +125,32 @@ export const verifyPaymentAndBook = createAsyncThunk(
     }
 );
 
+// Create direct booking without payment
+export const createDirectBooking = createAsyncThunk(
+    "booking/createDirectBooking",
+    async (bookingData, thunkAPI) => {
+        try {
+            // Get token fresh from localStorage or Redux
+            const token = getAuthToken(thunkAPI.getState);
+            if (!token) {
+                return thunkAPI.rejectWithValue("Please login to book a tour");
+            }
+
+            const response = await axios.post(`${API_URL}/direct-booking`, bookingData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+            });
+            return response.data;
+        } catch (error) {
+            const errorMessage = error.response?.data?.message || error.message || "Error creating booking";
+            console.error("Direct booking error:", errorMessage);
+            return thunkAPI.rejectWithValue(errorMessage);
+        }
+    }
+);
+
 // Get user's bookings
 export const fetchMyBookings = createAsyncThunk(
     "booking/fetchMyBookings",
@@ -224,18 +250,22 @@ export const confirmBooking = createAsyncThunk(
 // Cancel booking (Admin)
 export const cancelBooking = createAsyncThunk(
     "booking/cancelBooking",
-    async (bookingId, thunkAPI) => {
+    async ({ bookingId, rejectionReason }, thunkAPI) => {
         try {
             const token = getAuthToken(thunkAPI.getState);
             if (!token) {
                 return thunkAPI.rejectWithValue("Please login");
             }
 
-            const response = await axios.put(`${API_URL}/${bookingId}/cancel`, {}, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const response = await axios.put(`${API_URL}/${bookingId}/cancel`, 
+                { rejectionReason }, // Send rejection reason in request body
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
             return response.data;
         } catch (error) {
             return thunkAPI.rejectWithValue(
@@ -300,6 +330,23 @@ const bookingSlice = createSlice({
                 }
             })
             .addCase(verifyPaymentAndBook.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+
+            // Direct Booking
+            .addCase(createDirectBooking.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(createDirectBooking.fulfilled, (state, action) => {
+                state.loading = false;
+                // Add new booking to the list
+                if (action.payload?.booking) {
+                    state.bookings.unshift(action.payload.booking);
+                }
+            })
+            .addCase(createDirectBooking.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
             })
