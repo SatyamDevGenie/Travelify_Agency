@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTourById, deleteTour } from "../features/tour/tourSlice";
 import { useParams, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { showToast } from "../utils/toast";
 import BookingModal from "../components/BookingModal";
 
 const TourDetail = () => {
@@ -37,18 +37,20 @@ const TourDetail = () => {
   const handleDelete = () => {
     // Retaining window.confirm() but using toast for async result
     if (window.confirm(`Are you sure you want to permanently delete the tour: "${singleTour.title}"?`)) {
-      dispatch(deleteTour(singleTour._id))
-        .unwrap()
-        .then(() => {
-          // Success Toast
-          toast.success(`Tour "${singleTour.title}" deleted successfully! 🗑️`, { theme: "colored" });
-          navigate("/tours");
-        })
-        .catch((err) => {
-          // Error Toast
-          const errorMessage = err?.message || "Failed to delete tour. Please try again.";
-          toast.error(errorMessage, { theme: "colored" });
-        });
+      const deletePromise = dispatch(deleteTour(singleTour._id)).unwrap();
+      
+      showToast.promise(
+        deletePromise,
+        {
+          pending: `Deleting tour "${singleTour.title}"...`,
+          success: `🗑️ Tour "${singleTour.title}" deleted successfully!`,
+          error: "Failed to delete tour. Please try again.",
+        }
+      ).then(() => {
+        navigate("/tours");
+      }).catch((err) => {
+        console.error("Delete tour error:", err);
+      });
     }
   };
 
@@ -140,8 +142,10 @@ const TourDetail = () => {
               ) : (
                 <button
                   onClick={() => {
-                    toast.info("Please login to book a tour", { theme: "colored" });
-                    navigate("/login");
+                    showToast.auth.loginRequired();
+                    setTimeout(() => {
+                      navigate("/login");
+                    }, 1500);
                   }}
                   className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-xl shadow-lg hover:shadow-xl transition duration-300 transform hover:scale-[1.02] flex items-center justify-center space-x-2"
                 >

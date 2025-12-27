@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { createTour } from "../features/tour/tourSlice";
+import { createTour, fetchTours } from "../features/tour/tourSlice";
 import { useNavigate } from "react-router-dom";
-// 1. Import toast
-import { toast } from "react-toastify";
+import { showToast } from "../utils/toast";
 
 // Helper components (Left unchanged)
 const LabelWithIcon = ({ label, icon }) => (
@@ -86,33 +85,41 @@ const CreateTour = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!title || !description || !location || !price || !availableSlots || !category || !subcategory || !image) {
-      // 2. Toast for missing fields
-      toast.error("Please fill in all fields before publishing the tour.", { theme: "colored" });
+      showToast.warning("Please fill in all fields before publishing the tour.");
       return;
     }
 
+    const tourCreationPromise = dispatch(
+      createTour({
+        title,
+        description,
+        location,
+        price: Number(price),
+        availableSlots: Number(availableSlots),
+        category,
+        subcategory,
+        image,
+      })
+    ).unwrap();
+
     try {
-      await dispatch(
-        createTour({
-          title,
-          description,
-          location,
-          price: Number(price),
-          availableSlots: Number(availableSlots),
-          category,
-          subcategory,
-          image,
-        })
-      ).unwrap();
+      await showToast.promise(
+        tourCreationPromise,
+        {
+          pending: "Creating your amazing tour...",
+          success: `🚀 Tour "${title}" created successfully!`,
+          error: "Failed to create tour. Please check your data.",
+        }
+      );
 
-      // 3. Success Toast
-      toast.success("Tour Created Successfully 🎉 .", { theme: "colored" });
+      // Refresh tours list to ensure it's up to date
+      dispatch(fetchTours());
 
+      // Navigate to tours page
       navigate("/tours");
     } catch (err) {
-      // 4. Error Toast
-      const errorMessage = err?.message || "Failed to create tour. Please check your data.";
-      toast.error(errorMessage, { theme: "colored" });
+      // Error is already handled by the promise toast
+      console.error("Tour creation error:", err);
     }
   };
 

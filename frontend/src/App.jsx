@@ -1,13 +1,13 @@
 import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'; // Import the CSS
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { toastContainerConfig, showToast } from "./utils/toast";
 
 // Components
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Tours from "./components/Tours";
-
 
 // Pages
 import Home from "./pages/Home";
@@ -22,25 +22,17 @@ import MyBookings from "./pages/MyBookings";
 import AdminBookings from "./pages/AdminBookings";
 
 function App() {
-  // Use useEffect to trigger the toast when the component mounts
+  // Professional welcome toast
   useEffect(() => {
-    // A fancy-looking toast (e.g., a success type)
-    toast.success("Welcome to Travelify! ✈️", {
-      position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "colored", // Use a colored theme for a fancy look
+    showToast.success("Welcome to Travelify! ✈️", {
+      autoClose: 3000,
     });
-  }, []); // Empty dependency array ensures it runs only once on mount
+  }, []);
 
   return (
     <Router>
-      {/* 1. Add the ToastContainer here, outside of the Routes */}
-      <ToastContainer />
+      {/* Professional Toast Container */}
+      <ToastContainer {...toastContainerConfig} />
 
       <Navbar />
 

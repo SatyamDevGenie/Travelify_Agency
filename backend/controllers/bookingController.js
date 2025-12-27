@@ -465,10 +465,16 @@ Best regards,
 Travelify Team
         `;
 
+        console.log("📧 Preparing to send rejection email to:", booking.guestDetails.email);
+        console.log("📧 Rejection reason:", rejectionReason);
+
         try {
-            await sendEmail(booking.guestDetails.email, emailSubject, emailText);
+            const emailResult = await sendEmail(booking.guestDetails.email, emailSubject, emailText);
+            console.log("📧 Rejection email sent successfully:", emailResult);
         } catch (emailError) {
-            console.error("Error sending email:", emailError);
+            console.error("📧 Error sending rejection email:", emailError);
+            // Don't fail the booking cancellation if email fails
+            console.log("📧 Continuing with booking cancellation despite email failure");
         }
 
         res.json({
