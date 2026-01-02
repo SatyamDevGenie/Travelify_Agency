@@ -27,7 +27,7 @@ export const sendEmail = async (to, subject, text) => {
         
         // Create transporter with better Gmail configuration
         console.log("📧 Using Gmail with business email display");
-        const transporter = nodemailer.createTransporter({
+        const transporter = nodemailer.createTransport({
             service: 'gmail',
             host: 'smtp.gmail.com',
             port: 587,

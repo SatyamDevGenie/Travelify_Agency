@@ -22,6 +22,18 @@ const tourSchema = new mongoose.Schema({
     price: { type: Number, required: true },
     availableSlots: { type: Number, default: 0 },
     image: { type: String },
+    
+    // Review fields
+    averageRating: {
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 5
+    },
+    totalReviews: {
+        type: Number,
+        default: 0
+    }
 }, { timestamps: true });
 
 export default mongoose.model("Tour", tourSchema);

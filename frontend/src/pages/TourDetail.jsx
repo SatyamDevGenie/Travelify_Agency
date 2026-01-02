@@ -4,6 +4,8 @@ import { fetchTourById, deleteTour } from "../features/tour/tourSlice";
 import { useParams, useNavigate } from "react-router-dom";
 import { showToast } from "../utils/toast";
 import BookingModal from "../components/BookingModal";
+import ReviewSection from "../components/ReviewSection";
+import StarRating from "../components/StarRating";
 
 const TourDetail = () => {
   const { id } = useParams();
@@ -108,6 +110,20 @@ const TourDetail = () => {
               <InfoCard icon="✅" label="Available Slots" value={singleTour.availableSlots} />
             </div>
 
+            {/* Rating Display */}
+            {singleTour.totalReviews > 0 && (
+              <div className="pt-4 border-t border-gray-100">
+                <div className="flex items-center space-x-3">
+                  <span className="text-lg font-semibold text-gray-800">Rating:</span>
+                  <StarRating 
+                    rating={singleTour.averageRating} 
+                    totalReviews={singleTour.totalReviews}
+                    size="text-lg"
+                  />
+                </div>
+              </div>
+            )}
+
             {/* Price & Booking */}
             <div className="pt-6 sm:pt-8 space-y-4 sm:space-y-6">
               <p className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-indigo-700">
@@ -121,38 +137,43 @@ const TourDetail = () => {
                 </span>
               </p>
 
-              {user ? (
-                singleTour.availableSlots > 0 ? (
-                  <button
-                    onClick={() => setIsBookingModalOpen(true)}
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-xl shadow-lg hover:shadow-xl transition duration-300 transform hover:scale-[1.02] flex items-center justify-center space-x-2"
-                  >
-                    <span>🎟️</span>
-                    <span>Book Your Adventure Now</span>
-                  </button>
+              {/* Action Buttons */}
+              <div className="space-y-3">
+                {user ? (
+                  singleTour.availableSlots > 0 ? (
+                    <button
+                      onClick={() => setIsBookingModalOpen(true)}
+                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-xl shadow-lg hover:shadow-xl transition duration-300 transform hover:scale-[1.02] flex items-center justify-center space-x-2"
+                    >
+                      <span>🎟️</span>
+                      <span>Book Your Adventure Now</span>
+                    </button>
+                  ) : (
+                    <button
+                      disabled
+                      className="w-full bg-gray-400 text-white font-bold text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-xl shadow-lg cursor-not-allowed flex items-center justify-center space-x-2"
+                    >
+                      <span>❌</span>
+                      <span>No Slots Available</span>
+                    </button>
+                  )
                 ) : (
                   <button
-                    disabled
-                    className="w-full bg-gray-400 text-white font-bold text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-xl shadow-lg cursor-not-allowed flex items-center justify-center space-x-2"
+                    onClick={() => {
+                      showToast.auth.loginRequired();
+                      setTimeout(() => {
+                        navigate("/login");
+                      }, 1500);
+                    }}
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-xl shadow-lg hover:shadow-xl transition duration-300 transform hover:scale-[1.02] flex items-center justify-center space-x-2"
                   >
-                    <span>❌</span>
-                    <span>No Slots Available</span>
+                    <span>🔐</span>
+                    <span>Login to Book</span>
                   </button>
-                )
-              ) : (
-                <button
-                  onClick={() => {
-                    showToast.auth.loginRequired();
-                    setTimeout(() => {
-                      navigate("/login");
-                    }, 1500);
-                  }}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-xl shadow-lg hover:shadow-xl transition duration-300 transform hover:scale-[1.02] flex items-center justify-center space-x-2"
-                >
-                  <span>🔐</span>
-                  <span>Login to Book</span>
-                </button>
-              )}
+                )}
+
+              
+              </div>
 
               {/* Admin Controls */}
               {user?.isAdmin && (
@@ -184,6 +205,11 @@ const TourDetail = () => {
           onClose={() => setIsBookingModalOpen(false)}
         />
       )}
+
+      {/* Reviews Section */}
+      <div id="reviews-section">
+        <ReviewSection tourId={singleTour._id} tourTitle={singleTour.title} />
+      </div>
     </div>
   );
 };

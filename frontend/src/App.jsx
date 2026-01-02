@@ -12,6 +12,7 @@ import Tours from "./components/Tours";
 // Pages
 import Home from "./pages/Home";
 import About from "./pages/About";
+import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
@@ -19,6 +20,7 @@ import TourDetail from "./pages/TourDetail";
 import CreateTour from "./pages/CreateTour";
 import EditTour from "./pages/EditTour";
 import MyBookings from "./pages/MyBookings";
+import MyReviews from "./pages/MyReviews";
 import AdminBookings from "./pages/AdminBookings";
 
 function App() {
@@ -42,6 +44,7 @@ function App() {
           {/* Main pages */}
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
 
           {/* Tours pages */}
           <Route path="/tours" element={<Tours />} />
@@ -62,6 +65,7 @@ function App() {
 
           {/* Bookings */}
           <Route path="/my-bookings" element={<MyBookings />} />
+          <Route path="/my-reviews" element={<MyReviews />} />
           <Route path="/admin/bookings" element={<AdminBookings />} />
 
         </Routes>

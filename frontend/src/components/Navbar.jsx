@@ -65,6 +65,12 @@ const Navbar = () => {
             >
               About
             </Link>
+            <Link 
+              to="/contact" 
+              className="text-slate-700 hover:text-slate-900 font-medium transition-colors"
+            >
+              Contact
+            </Link>
           </div>
 
           {/* User Section */}
@@ -114,6 +120,15 @@ const Navbar = () => {
                       >
                         <span className="mr-3 text-slate-400">📋</span>
                         My Bookings
+                      </Link>
+                      
+                      <Link
+                        to="/my-reviews"
+                        className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                        onClick={() => setOpenUser(false)}
+                      >
+                        <span className="mr-3 text-slate-400">⭐</span>
+                        My Reviews
                       </Link>
                       
                       {user.isAdmin && (
@@ -198,6 +213,14 @@ const Navbar = () => {
               About
             </Link>
 
+            <Link
+              to="/contact"
+              onClick={() => setOpenMenu(false)}
+              className="block text-slate-700 hover:text-slate-900 font-medium py-2 transition-colors"
+            >
+              Contact
+            </Link>
+
             {user ? (
               <div className="space-y-3 pt-4 border-t border-slate-200">
                 <div className="flex items-center space-x-3 pb-3">
@@ -224,6 +247,14 @@ const Navbar = () => {
                   className="block text-slate-700 hover:text-slate-900 py-2 transition-colors"
                 >
                   My Bookings
+                </Link>
+                
+                <Link
+                  to="/my-reviews"
+                  onClick={() => setOpenMenu(false)}
+                  className="block text-slate-700 hover:text-slate-900 py-2 transition-colors"
+                >
+                  My Reviews
                 </Link>
                 
                 {user.isAdmin && (

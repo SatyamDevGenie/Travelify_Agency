@@ -8,8 +8,8 @@ const testRealEmail = async () => {
         console.log("🧪 Testing real email sending...");
         console.log("📧 From email:", process.env.EMAIL_USER);
         
-        // Test with a different email address (you can change this to any email you want to test)
-        const testToEmail = "test@example.com"; // Change this to your personal email or friend's email
+        // Test with your personal email
+        const testToEmail = "satyamsawant54@gmail.com"; // Testing with your own email
         
         const emailSubject = "Test Email from Travelify - Real Email Test";
         const emailText = `

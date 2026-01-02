@@ -4,6 +4,7 @@ import { fetchTours } from "../features/tour/tourSlice";
 import { motion } from "framer-motion";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { showToast } from "../utils/toast";
+import StarRating from "./StarRating";
 
 const Tours = () => {
   const dispatch = useDispatch();
@@ -203,6 +204,16 @@ const Tours = () => {
                   <p className="text-muted mb-2">
                     📍 {tour.location}
                   </p>
+                  
+                  {/* Rating Display */}
+                  <div className="mb-3">
+                    <StarRating 
+                      rating={tour.averageRating || 0} 
+                      totalReviews={tour.totalReviews || 0}
+                      size="text-sm"
+                    />
+                  </div>
+                  
                   <p className="text-body line-clamp-3 flex-1 mb-4">
                     {tour.description}
                   </p>
