@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import Tours from "../components/Tours";
 import BlockbusterOffers from "../components/Offers";
+import ImageUploadSection from "../components/ImageUploadSection";
 
 const Home = () => {
     return (
@@ -144,6 +145,9 @@ const Home = () => {
                     <Tours />
                 </div>
             </section>
+
+            {/* Image Upload Section */}
+            <ImageUploadSection />
 
             {/* Offers Section */}
             <section className="py-20 bg-white">
