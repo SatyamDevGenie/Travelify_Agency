@@ -8,6 +8,7 @@ import {
     clearOrder,
 } from "../features/booking/bookingSlice";
 import { loadRazorpay } from "../utils/razorpay";
+import PhoneInput from "./PhoneInput";
 
 const BookingModal = ({ tour, isOpen, onClose }) => {
     const dispatch = useDispatch();
@@ -537,12 +538,10 @@ const BookingModal = ({ tour, isOpen, onClose }) => {
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         Phone Number *
                                     </label>
-                                    <input
-                                        type="tel"
-                                        name="phone"
+                                    <PhoneInput
                                         value={formData.phone}
-                                        onChange={handleChange}
-                                        className="input-field"
+                                        onChange={(phone) => setFormData({ ...formData, phone })}
+                                        className="w-full"
                                         required
                                     />
                                 </div>
