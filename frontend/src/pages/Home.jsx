@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import Tours from "../components/Tours";
 import BlockbusterOffers from "../components/Offers";
-import ImageUploadSection from "../components/ImageUploadSection";
+import MediaUploadSection from "../components/MediaUploadSection";
 
 const Home = () => {
     return (
@@ -146,8 +146,8 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* Image Upload Section */}
-            <ImageUploadSection />
+            {/* Media Upload Section */}
+            <MediaUploadSection />
 
             {/* Offers Section */}
             <section className="py-20 bg-white">

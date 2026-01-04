@@ -21,6 +21,8 @@ import CreateTour from "./pages/CreateTour";
 import EditTour from "./pages/EditTour";
 import MyBookings from "./pages/MyBookings";
 import MyReviews from "./pages/MyReviews";
+import MyMedia from "./pages/MyMedia";
+import MyPhotos from "./pages/MyPhotos";
 import AdminBookings from "./pages/AdminBookings";
 import Wishlist from "./pages/Wishlist";
 import SavedPhotos from "./pages/SavedPhotos";
@@ -68,6 +70,8 @@ function App() {
           {/* Bookings */}
           <Route path="/my-bookings" element={<MyBookings />} />
           <Route path="/my-reviews" element={<MyReviews />} />
+          <Route path="/my-photos" element={<MyPhotos />} />
+          <Route path="/my-media" element={<MyMedia />} />
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/saved-photos" element={<SavedPhotos />} />
           <Route path="/admin/bookings" element={<AdminBookings />} />

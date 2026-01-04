@@ -149,6 +149,24 @@ const Navbar = () => {
                         My Reviews
                       </Link>
                       
+                      <Link
+                        to="/my-photos"
+                        className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                        onClick={() => setOpenUser(false)}
+                      >
+                        <span className="mr-3 text-slate-400">📷</span>
+                        My Photos
+                      </Link>
+                      
+                      <Link
+                        to="/my-media"
+                        className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                        onClick={() => setOpenUser(false)}
+                      >
+                        <span className="mr-3 text-slate-400">🎬</span>
+                        My Media
+                      </Link>
+                      
                       {user.isAdmin && (
                         <>
                           <div className="divider my-2"></div>
@@ -289,6 +307,22 @@ const Navbar = () => {
                   className="block text-slate-700 hover:text-slate-900 py-2 transition-colors"
                 >
                   My Reviews
+                </Link>
+                
+                <Link
+                  to="/my-photos"
+                  onClick={() => setOpenMenu(false)}
+                  className="block text-slate-700 hover:text-slate-900 py-2 transition-colors"
+                >
+                  My Photos
+                </Link>
+                
+                <Link
+                  to="/my-media"
+                  onClick={() => setOpenMenu(false)}
+                  className="block text-slate-700 hover:text-slate-900 py-2 transition-colors"
+                >
+                  My Media
                 </Link>
                 
                 {user.isAdmin && (
