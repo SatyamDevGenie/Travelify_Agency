@@ -123,6 +123,24 @@ const Navbar = () => {
                       </Link>
                       
                       <Link
+                        to="/wishlist"
+                        className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                        onClick={() => setOpenUser(false)}
+                      >
+                        <span className="mr-3 text-slate-400">❤️</span>
+                        My Wishlist
+                      </Link>
+                      
+                      <Link
+                        to="/saved-photos"
+                        className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                        onClick={() => setOpenUser(false)}
+                      >
+                        <span className="mr-3 text-slate-400">📸</span>
+                        Saved Photos
+                      </Link>
+                      
+                      <Link
                         to="/my-reviews"
                         className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                         onClick={() => setOpenUser(false)}
@@ -247,6 +265,22 @@ const Navbar = () => {
                   className="block text-slate-700 hover:text-slate-900 py-2 transition-colors"
                 >
                   My Bookings
+                </Link>
+                
+                <Link
+                  to="/wishlist"
+                  onClick={() => setOpenMenu(false)}
+                  className="block text-slate-700 hover:text-slate-900 py-2 transition-colors"
+                >
+                  My Wishlist
+                </Link>
+                
+                <Link
+                  to="/saved-photos"
+                  onClick={() => setOpenMenu(false)}
+                  className="block text-slate-700 hover:text-slate-900 py-2 transition-colors"
+                >
+                  Saved Photos
                 </Link>
                 
                 <Link

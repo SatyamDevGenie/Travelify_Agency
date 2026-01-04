@@ -6,6 +6,7 @@ import { showToast } from "../utils/toast";
 import BookingModal from "../components/BookingModal";
 import ReviewSection from "../components/ReviewSection";
 import StarRating from "../components/StarRating";
+import WishlistButton from "../components/WishlistButton";
 
 const TourDetail = () => {
   const { id } = useParams();
@@ -139,6 +140,16 @@ const TourDetail = () => {
 
               {/* Action Buttons */}
               <div className="space-y-3">
+                {/* Wishlist Button */}
+                <div className="flex justify-center">
+                  <WishlistButton 
+                    tourId={singleTour._id} 
+                    size="lg" 
+                    showText={true}
+                    className="px-6 py-3"
+                  />
+                </div>
+
                 {user ? (
                   singleTour.availableSlots > 0 ? (
                     <button

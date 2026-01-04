@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { showToast } from "../utils/toast";
 import StarRating from "./StarRating";
+import WishlistButton from "./WishlistButton";
 
 const Tours = () => {
   const dispatch = useDispatch();
@@ -185,16 +186,23 @@ const Tours = () => {
                 className="card hover-lift animate-fade-in flex flex-col"
               >
                 {/* Tour Image */}
-                <Link
-                  to={`/tour/${tour._id}`}
-                  className="block"
-                >
-                  <img
-                    src={tour.image}
-                    alt={tour.title}
-                    className="w-full h-48 sm:h-56 lg:h-48 xl:h-56 object-cover rounded-t-lg hover-scale"
-                  />
-                </Link>
+                <div className="relative">
+                  <Link
+                    to={`/tour/${tour._id}`}
+                    className="block"
+                  >
+                    <img
+                      src={tour.image}
+                      alt={tour.title}
+                      className="w-full h-48 sm:h-56 lg:h-48 xl:h-56 object-cover rounded-t-lg hover-scale"
+                    />
+                  </Link>
+                  
+                  {/* Wishlist Button */}
+                  <div className="absolute top-3 right-3">
+                    <WishlistButton tourId={tour._id} size="sm" />
+                  </div>
+                </div>
 
                 {/* Tour Content */}
                 <div className="card-body flex flex-col flex-1">

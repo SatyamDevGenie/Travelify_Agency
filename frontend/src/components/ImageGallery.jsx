@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { FaHeart, FaRegHeart, FaUser, FaMapMarkerAlt, FaTag, FaEye } from "react-icons/fa";
+import { FaUser, FaMapMarkerAlt, FaEye } from "react-icons/fa";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { showToast } from "../utils/toast";
+import PhotoWishlistButton from "./PhotoWishlistButton";
 
 const ImageGallery = ({ refreshTrigger }) => {
     const { user } = useSelector((state) => state.auth);
@@ -39,39 +40,6 @@ const ImageGallery = ({ refreshTrigger }) => {
             showToast.error("Error loading images");
         } finally {
             setLoading(false);
-        }
-    };
-
-    const handleLike = async (imageId) => {
-        if (!user) {
-            showToast.error("Please login to like images");
-            return;
-        }
-
-        try {
-            const userData = JSON.parse(localStorage.getItem("user"));
-            const token = userData?.token;
-
-            const response = await axios.post(`/api/images/${imageId}/like`, {}, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-
-            if (response.data.success) {
-                setImages(prev => prev.map(img => 
-                    img._id === imageId 
-                        ? { 
-                            ...img, 
-                            totalLikes: response.data.data.totalLikes,
-                            likes: response.data.data.liked 
-                                ? [...img.likes, user._id]
-                                : img.likes.filter(id => id !== user._id)
-                        }
-                        : img
-                ));
-            }
-        } catch (error) {
-            console.error("Error toggling like:", error);
-            showToast.error("Error updating like");
         }
     };
 
@@ -158,17 +126,9 @@ const ImageGallery = ({ refreshTrigger }) => {
                             )}
 
                             <div className="flex items-center justify-between pt-4 border-t">
-                                <button
-                                    onClick={() => handleLike(image._id)}
-                                    className="flex items-center space-x-2 text-gray-600 hover:text-red-500 transition-colors"
-                                >
-                                    {user && image.likes?.includes(user._id) ? (
-                                        <FaHeart className="text-red-500" />
-                                    ) : (
-                                        <FaRegHeart />
-                                    )}
-                                    <span>{image.totalLikes || 0}</span>
-                                </button>
+                                <div className="text-sm text-gray-600">
+                                    {image.totalLikes || 0} likes
+                                </div>
                                 
                                 <div className="text-sm text-gray-500">
                                     {image.dimensions?.width} × {image.dimensions?.height}
@@ -225,19 +185,7 @@ const ImageGallery = ({ refreshTrigger }) => {
                                     <FaEye className="text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                 </div>
                                 <div className="absolute top-2 right-2">
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleLike(image._id);
-                                        }}
-                                        className="p-2 bg-white bg-opacity-80 rounded-full hover:bg-opacity-100 transition-all"
-                                    >
-                                        {user && image.likes?.includes(user._id) ? (
-                                            <FaHeart className="text-red-500" />
-                                        ) : (
-                                            <FaRegHeart className="text-gray-600" />
-                                        )}
-                                    </button>
+                                    <PhotoWishlistButton imageId={image._id} size="sm" />
                                 </div>
                             </div>
                             
@@ -257,9 +205,8 @@ const ImageGallery = ({ refreshTrigger }) => {
                                 )}
 
                                 <div className="flex items-center justify-between">
-                                    <div className="flex items-center space-x-1 text-sm text-gray-600">
-                                        <FaHeart className="text-red-500" />
-                                        <span>{image.totalLikes || 0}</span>
+                                    <div className="text-sm text-gray-600">
+                                        {image.totalLikes || 0} likes
                                     </div>
                                     <span className="text-xs text-gray-500">
                                         {formatDate(image.createdAt)}

@@ -22,6 +22,8 @@ import EditTour from "./pages/EditTour";
 import MyBookings from "./pages/MyBookings";
 import MyReviews from "./pages/MyReviews";
 import AdminBookings from "./pages/AdminBookings";
+import Wishlist from "./pages/Wishlist";
+import SavedPhotos from "./pages/SavedPhotos";
 
 function App() {
   // Professional welcome toast
@@ -66,6 +68,8 @@ function App() {
           {/* Bookings */}
           <Route path="/my-bookings" element={<MyBookings />} />
           <Route path="/my-reviews" element={<MyReviews />} />
+          <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="/saved-photos" element={<SavedPhotos />} />
           <Route path="/admin/bookings" element={<AdminBookings />} />
 
         </Routes>

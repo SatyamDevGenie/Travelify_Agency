@@ -8,6 +8,8 @@ import tourRoutes from "./routes/tourRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import imageRoutes from "./routes/imageRoutes.js";
+import wishlistRoutes from "./routes/wishlistRoutes.js";
+import photoWishlistRoutes from "./routes/photoWishlistRoutes.js";
 
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
@@ -25,6 +27,8 @@ app.use("/api/tours", tourRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/images", imageRoutes);
+app.use("/api/wishlist", wishlistRoutes);
+app.use("/api/photo-wishlist", photoWishlistRoutes);
 
 
 
