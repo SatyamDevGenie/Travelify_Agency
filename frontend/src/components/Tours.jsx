@@ -6,6 +6,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { showToast } from "../utils/toast";
 import StarRating from "./StarRating";
 import WishlistButton from "./WishlistButton";
+import GPSIndicator from "./GPSIndicator";
 
 const Tours = () => {
   const dispatch = useDispatch();
@@ -212,6 +213,11 @@ const Tours = () => {
                   <p className="text-muted mb-2">
                     📍 {tour.location}
                   </p>
+                  
+                  {/* GPS Indicator */}
+                  <div className="mb-2">
+                    <GPSIndicator tour={tour} size="sm" />
+                  </div>
                   
                   {/* Rating Display */}
                   <div className="mb-3">

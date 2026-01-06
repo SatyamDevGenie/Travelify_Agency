@@ -1,6 +1,8 @@
 import Tour from "../models/tourModel.js";
 import cloudinary from "../config/cloudinary.js";
 import fs from "fs";
+import { getCoordinatesFromLocation } from "../services/geocodingService.js";
+import { updateExistingToursWithGPS, updateSingleTourWithGPS } from "../utils/updateToursWithGPS.js";
 
 // @desc Get all tours
 export const getTours = async (req, res) => {
@@ -68,6 +70,17 @@ export const createTour = async (req, res) => {
             return res.status(400).json({ message: "Tour image is required" });
         }
 
+        // Get GPS coordinates for the location
+        const gpsResult = await getCoordinatesFromLocation(location);
+        let gpsLocation = null;
+        
+        if (gpsResult.success) {
+            gpsLocation = gpsResult.data;
+            console.log(`GPS coordinates found for ${location}:`, gpsLocation.coordinates);
+        } else {
+            console.warn(`Could not find GPS coordinates for ${location}:`, gpsResult.message);
+        }
+
         // Create new tour document
         const tour = await Tour.create({
             title,
@@ -78,6 +91,7 @@ export const createTour = async (req, res) => {
             category,
             subcategory,
             image: imageUrl,
+            gpsLocation: gpsLocation
         });
 
         // Success response
@@ -127,12 +141,29 @@ export const updateTour = async (req, res) => {
             fs.unlinkSync(req.file.path);
         }
 
+        // Get GPS coordinates for the location
+        const gpsResult = await getCoordinatesFromLocation(location);
+        let gpsLocation = null;
+        
+        if (gpsResult.success) {
+            gpsLocation = gpsResult.data;
+            console.log(`GPS coordinates found for ${location}:`, gpsLocation.coordinates);
+        } else {
+            console.warn(`Could not find GPS coordinates for ${location}:`, gpsResult.message);
+        }
+
         // Update fields (all as strings first, convert numbers where needed)
         if (title) tour.title = title;
         if (description) tour.description = description;
         if (price) tour.price = Number(price);
         if (availableSlots) tour.availableSlots = Number(availableSlots);
-        if (location) tour.location = location; // <== important
+        if (location) {
+            tour.location = location;
+            // Update GPS coordinates if location changed
+            if (gpsLocation) {
+                tour.gpsLocation = gpsLocation;
+            }
+        }
         if (category) tour.category = category;
         if (subcategory) tour.subcategory = subcategory;
 
@@ -168,3 +199,63 @@ export const deleteTour = async (req, res) => {
 
 
 
+
+// @desc Update all tours with GPS coordinates (Admin only)
+export const updateAllToursWithGPS = async (req, res) => {
+    try {
+        const result = await updateExistingToursWithGPS();
+        
+        if (result.success) {
+            res.json({
+                success: true,
+                message: "GPS update process completed",
+                data: {
+                    updated: result.updated,
+                    failed: result.failed,
+                    total: result.total
+                }
+            });
+        } else {
+            res.status(500).json({
+                success: false,
+                message: "GPS update process failed",
+                error: result.error
+            });
+        }
+    } catch (error) {
+        console.error("Error in GPS update endpoint:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error updating tours with GPS data",
+            error: error.message
+        });
+    }
+};
+
+// @desc Update single tour with GPS coordinates (Admin only)
+export const updateTourGPS = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await updateSingleTourWithGPS(id);
+        
+        if (result.success) {
+            res.json({
+                success: true,
+                message: result.message,
+                data: result.data
+            });
+        } else {
+            res.status(400).json({
+                success: false,
+                message: result.message
+            });
+        }
+    } catch (error) {
+        console.error("Error updating single tour GPS:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error updating tour GPS coordinates",
+            error: error.message
+        });
+    }
+};

@@ -3,7 +3,20 @@ import mongoose from "mongoose";
 const tourSchema = new mongoose.Schema({
     title: { type: String, required: true },
     description: { type: String, required: true },
-    location: { type: String, required: true },
+    location: { type: String, required: true }, // Keep for backward compatibility
+    
+    // GPS Location Data
+    gpsLocation: {
+        name: { type: String }, // "Bali, Indonesia"
+        coordinates: {
+            latitude: { type: Number },
+            longitude: { type: Number }
+        },
+        address: { type: String }, // Full address
+        city: { type: String },
+        country: { type: String },
+        zipCode: { type: String }
+    },
 
     category: {
         type: String,

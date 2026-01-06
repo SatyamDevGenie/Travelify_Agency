@@ -7,6 +7,7 @@ import BookingModal from "../components/BookingModal";
 import ReviewSection from "../components/ReviewSection";
 import StarRating from "../components/StarRating";
 import WishlistButton from "../components/WishlistButton";
+import RealTimeGPSDashboard from "../components/RealTimeGPSDashboard";
 
 const TourDetail = () => {
   const { id } = useParams();
@@ -217,8 +218,13 @@ const TourDetail = () => {
         />
       )}
 
+      {/* Real-Time GPS Dashboard */}
+      <div className="mt-8">
+        <RealTimeGPSDashboard tour={singleTour} />
+      </div>
+
       {/* Reviews Section */}
-      <div id="reviews-section">
+      <div id="reviews-section" className="mt-8">
         <ReviewSection tourId={singleTour._id} tourTitle={singleTour.title} />
       </div>
     </div>

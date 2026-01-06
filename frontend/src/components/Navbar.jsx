@@ -186,6 +186,14 @@ const Navbar = () => {
                             <span className="mr-3 text-slate-400">⚙️</span>
                             Manage Bookings
                           </Link>
+                          <Link
+                            to="/admin/gps-update"
+                            className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                            onClick={() => setOpenUser(false)}
+                          >
+                            <span className="mr-3 text-slate-400">🗺️</span>
+                            Update GPS
+                          </Link>
                         </>
                       )}
                       
@@ -340,6 +348,13 @@ const Navbar = () => {
                       className="block text-slate-700 hover:text-slate-900 py-2 transition-colors"
                     >
                       Manage Bookings
+                    </Link>
+                    <Link
+                      to="/admin/gps-update"
+                      onClick={() => setOpenMenu(false)}
+                      className="block text-slate-700 hover:text-slate-900 py-2 transition-colors"
+                    >
+                      Update GPS
                     </Link>
                   </>
                 )}

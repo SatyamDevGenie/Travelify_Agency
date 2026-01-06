@@ -6,6 +6,8 @@ import {
     updateTour,
     deleteTour,
     getTourById,
+    updateAllToursWithGPS,
+    updateTourGPS
 } from "../controllers/tourController.js";
 import { protect, admin } from "../middleware/authMiddleware.js";
 
@@ -28,6 +30,10 @@ router.get("/:id", getTourById);
 router.post("/", protect, admin, upload.single("image"), createTour);
 router.put("/:id", protect, admin, upload.single("image"), updateTour);
 router.delete("/:id", protect, admin, deleteTour);
+
+// GPS Update Routes (Admin only)
+router.post("/update-all-gps", protect, admin, updateAllToursWithGPS);
+router.post("/:id/update-gps", protect, admin, updateTourGPS);
 
 export default router;
 

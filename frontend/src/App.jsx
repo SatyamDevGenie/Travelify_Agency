@@ -24,6 +24,7 @@ import MyReviews from "./pages/MyReviews";
 import MyMedia from "./pages/MyMedia";
 import MyPhotos from "./pages/MyPhotos";
 import AdminBookings from "./pages/AdminBookings";
+import AdminGPSUpdate from "./pages/AdminGPSUpdate";
 import Wishlist from "./pages/Wishlist";
 import SavedPhotos from "./pages/SavedPhotos";
 
@@ -75,6 +76,7 @@ function App() {
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/saved-photos" element={<SavedPhotos />} />
           <Route path="/admin/bookings" element={<AdminBookings />} />
+          <Route path="/admin/gps-update" element={<AdminGPSUpdate />} />
 
         </Routes>
       </div>
