@@ -1,11 +1,19 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import Tours from "../components/Tours";
 import BlockbusterOffers from "../components/Offers";
 import MediaUploadSection from "../components/MediaUploadSection";
+import PhotoGallery from "../components/PhotoGallery";
+import PhotoUpload from "../components/PhotoUpload";
 
 const Home = () => {
+    const [photoRefreshTrigger, setPhotoRefreshTrigger] = useState(0);
+
+    const handlePhotoUploaded = () => {
+        setPhotoRefreshTrigger(prev => prev + 1);
+    };
+
     return (
         <div className="min-h-screen bg-slate-50">
             {/* Hero Section */}
@@ -143,6 +151,34 @@ const Home = () => {
                         </p>
                     </motion.div>
                     <Tours />
+                </div>
+            </section>
+
+            {/* Photo Gallery Section */}
+            <section className="py-20 bg-white">
+                <div className="container-fluid">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6 }}
+                        viewport={{ once: true }}
+                        className="text-center mb-12"
+                    >
+                        <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
+                            Travel Memories
+                        </h2>
+                        <p className="text-lg text-slate-600 mb-8">
+                            Share your travel photos and explore memories from fellow travelers
+                        </p>
+                        
+                        {/* Photo Upload Button */}
+                        <div className="flex justify-center mb-8">
+                            <PhotoUpload onPhotoUploaded={handlePhotoUploaded} />
+                        </div>
+                    </motion.div>
+                    
+                    {/* Photo Gallery */}
+                    <PhotoGallery refreshTrigger={photoRefreshTrigger} />
                 </div>
             </section>
 

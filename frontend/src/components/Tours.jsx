@@ -6,6 +6,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { showToast } from "../utils/toast";
 import StarRating from "./StarRating";
 import WishlistButton from "./WishlistButton";
+import LikeButton from "./LikeButton";
 
 const Tours = () => {
   const dispatch = useDispatch();
@@ -227,9 +228,19 @@ const Tours = () => {
                   </p>
 
                   <div className="flex justify-between items-center flex-wrap gap-2 mt-auto">
-                    <p className="text-heading text-blue-600">
-                      ₹{tour.price.toLocaleString("en-IN")}
-                    </p>
+                    <div className="flex items-center space-x-3">
+                      <p className="text-heading text-blue-600">
+                        ₹{tour.price.toLocaleString("en-IN")}
+                      </p>
+                      
+                      {/* Like Button */}
+                      <LikeButton
+                        type="tour"
+                        itemId={tour._id}
+                        initialLiked={tour.isLikedByUser}
+                        initialCount={tour.totalLikes || 0}
+                      />
+                    </div>
 
                     <button 
                       onClick={() => handleBookNow(tour)}

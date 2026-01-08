@@ -9,7 +9,7 @@ import {
     updateAllToursWithGPS,
     updateTourGPS
 } from "../controllers/tourController.js";
-import { protect, admin } from "../middleware/authMiddleware.js";
+import { protect, admin, optionalAuth } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -25,8 +25,8 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-router.get("/", getTours);
-router.get("/:id", getTourById);
+router.get("/", optionalAuth, getTours);
+router.get("/:id", optionalAuth, getTourById);
 router.post("/", protect, admin, upload.single("image"), createTour);
 router.put("/:id", protect, admin, upload.single("image"), updateTour);
 router.delete("/:id", protect, admin, deleteTour);

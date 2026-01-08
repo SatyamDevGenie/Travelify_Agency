@@ -8,6 +8,20 @@ import { updateExistingToursWithGPS, updateSingleTourWithGPS } from "../utils/up
 export const getTours = async (req, res) => {
     try {
         const tours = await Tour.find();
+        
+        // If user is authenticated, add like status
+        if (req.user) {
+            const userId = req.user._id;
+            const toursWithLikeStatus = tours.map(tour => {
+                const tourObj = tour.toObject();
+                tourObj.isLikedByUser = tour.likes.some(like => 
+                    like.user.toString() === userId.toString()
+                );
+                return tourObj;
+            });
+            return res.json(toursWithLikeStatus);
+        }
+        
         res.json(tours);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -27,9 +41,19 @@ export const getTourById = async (req, res) => {
             });
         }
 
+        const tourObj = tour.toObject();
+        
+        // If user is authenticated, add like status
+        if (req.user) {
+            const userId = req.user._id;
+            tourObj.isLikedByUser = tour.likes.some(like => 
+                like.user.toString() === userId.toString()
+            );
+        }
+
         res.json({
             success: true,
-            data: tour,
+            data: tourObj,
         });
 
     } catch (error) {

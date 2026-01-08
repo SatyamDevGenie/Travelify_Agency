@@ -11,6 +11,8 @@ import imageRoutes from "./routes/imageRoutes.js";
 import videoRoutes from "./routes/videoRoutes.js";
 import wishlistRoutes from "./routes/wishlistRoutes.js";
 import photoWishlistRoutes from "./routes/photoWishlistRoutes.js";
+import likeRoutes from "./routes/likeRoutes.js";
+import photoRoutes from "./routes/photoRoutes.js";
 import { initializeGPSTracking } from "./services/gpsTrackingService.js";
 
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
@@ -39,6 +41,8 @@ app.use("/api/images", imageRoutes);
 app.use("/api/videos", videoRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/photo-wishlist", photoWishlistRoutes);
+app.use("/api/likes", likeRoutes);
+app.use("/api/photos", photoRoutes);
 
 // Example routes
 app.get("/", (req, res) => res.send("Travelify API with Real-time GPS is running..."));

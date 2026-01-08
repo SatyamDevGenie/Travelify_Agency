@@ -6,6 +6,7 @@ import axios from "axios";
 import { showToast } from "../utils/toast";
 import ImageUpload from "../components/ImageUpload";
 import VideoUpload from "../components/VideoUpload";
+import LikeButton from "../components/LikeButton";
 
 const MyMedia = () => {
     const { user } = useSelector((state) => state.auth);
