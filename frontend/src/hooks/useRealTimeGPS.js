@@ -15,39 +15,47 @@ export const useRealTimeGPS = (tourId, userId) => {
     // Initialize Socket.IO connection
     useEffect(() => {
         if (tourId) {
-            socketRef.current = io(import.meta.env.VITE_API_URL || "http://localhost:5000");
-            
-            const socket = socketRef.current;
+            try {
+                socketRef.current = io(import.meta.env.VITE_API_URL || "http://localhost:5000");
+                
+                const socket = socketRef.current;
 
-            // Join tour room for real-time updates
-            socket.emit('join-tour', tourId);
+                // Join tour room for real-time updates
+                socket.emit('join-tour', tourId);
 
-            // Listen for other users' location updates
-            socket.on('user-location-update', (data) => {
-                setConnectedUsers(prev => {
-                    const updated = prev.filter(user => user.userId !== data.userId);
-                    return [...updated, data];
+                // Listen for other users' location updates
+                socket.on('user-location-update', (data) => {
+                    setConnectedUsers(prev => {
+                        const updated = prev.filter(user => user.userId !== data.userId);
+                        return [...updated, data];
+                    });
                 });
-            });
 
-            // Listen for tour guide location updates
-            socket.on('guide-location-update', (data) => {
-                setGuideLocation(data);
-            });
+                // Listen for tour guide location updates
+                socket.on('guide-location-update', (data) => {
+                    setGuideLocation(data);
+                });
 
-            // Handle connection events
-            socket.on('connect', () => {
-                console.log('🔗 Connected to GPS tracking server');
-            });
+                // Handle connection events
+                socket.on('connect', () => {
+                    console.log('🔗 Connected to GPS tracking server');
+                });
 
-            socket.on('disconnect', () => {
-                console.log('🔌 Disconnected from GPS tracking server');
-            });
+                socket.on('disconnect', () => {
+                    console.log('🔌 Disconnected from GPS tracking server');
+                });
 
-            return () => {
-                socket.emit('leave-tour', tourId);
-                socket.disconnect();
-            };
+                socket.on('connect_error', (error) => {
+                    console.warn('GPS tracking connection error:', error);
+                });
+
+                return () => {
+                    socket.emit('leave-tour', tourId);
+                    socket.disconnect();
+                };
+            } catch (error) {
+                console.error('Error initializing GPS tracking:', error);
+            }
         }
     }, [tourId]);
 

@@ -126,11 +126,15 @@ const RealTimeGPSDashboard = ({ tour }) => {
 
                     {userLocation && tour?.gpsLocation?.coordinates && (
                         <button
-                            onClick={() => window.open(`https://www.google.com/maps/dir/${userLocation.lat},${userLocation.lng}/${tour.gpsLocation.coordinates.latitude},${tour.gpsLocation.coordinates.longitude}`, '_blank')}
+                            onClick={() => {
+                                const { latitude, longitude } = tour.gpsLocation.coordinates;
+                                const directionsUrl = `https://www.google.com/maps/dir/${userLocation.lat},${userLocation.lng}/${latitude},${longitude}/@${latitude},${longitude},15z/data=!3m1!4b1!4m2!4m1!3e0`;
+                                window.open(directionsUrl, '_blank');
+                            }}
                             className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
                         >
                             <FaRoute />
-                            <span>Navigate Now</span>
+                            <span>Navigate with Travel Options</span>
                         </button>
                     )}
                 </div>

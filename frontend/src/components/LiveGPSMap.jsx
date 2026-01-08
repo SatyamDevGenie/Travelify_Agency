@@ -152,33 +152,55 @@ const LiveGPSMap = ({ tour, showUserLocation = true }) => {
         }
     };
 
-    // Generate map URL with markers
-    const generateMapUrl = (isFullSize = false) => {
+    // Enhanced Google Maps URLs with travel options
+    const getGoogleMapsDirectionsUrl = () => {
         if (!hasGPSData) return null;
-
-        const tourLat = tour.gpsLocation.coordinates.latitude;
-        const tourLng = tour.gpsLocation.coordinates.longitude;
         
-        let bbox, markers = "";
+        const { latitude, longitude } = tour.gpsLocation.coordinates;
+        const destination = `${latitude},${longitude}`;
+        
+        if (userLocation) {
+            // From user location to tour with travel options
+            return `https://www.google.com/maps/dir/${userLocation.lat},${userLocation.lng}/${destination}/@${latitude},${longitude},15z/data=!3m1!4b1!4m2!4m1!3e0`;
+        } else {
+            // Just show tour location with nearby area
+            return `https://www.google.com/maps/place/${destination}/@${latitude},${longitude},15z/data=!3m1!4b1`;
+        }
+    };
+
+    const getGoogleMapsEmbedUrl = () => {
+        if (!hasGPSData) return null;
+        
+        const { latitude, longitude } = tour.gpsLocation.coordinates;
+        const zoom = userLocation ? 12 : 15;
+        
+        let center = `${latitude},${longitude}`;
+        let markers = `&markers=color:red%7Clabel:T%7C${latitude},${longitude}`;
         
         if (userLocation) {
             // Show both user and tour location
-            const minLat = Math.min(userLocation.lat, tourLat) - 0.01;
-            const maxLat = Math.max(userLocation.lat, tourLat) + 0.01;
-            const minLng = Math.min(userLocation.lng, tourLng) - 0.01;
-            const maxLng = Math.max(userLocation.lng, tourLng) + 0.01;
-            
-            bbox = `${minLng},${minLat},${maxLng},${maxLat}`;
-            markers = `&marker=${tourLat},${tourLng}&marker=${userLocation.lat},${userLocation.lng}`;
-        } else {
-            // Show only tour location
-            const center = mapCenter || { lat: tourLat, lng: tourLng };
-            const offset = 0.01;
-            bbox = `${center.lng - offset},${center.lat - offset},${center.lng + offset},${center.lat + offset}`;
-            markers = `&marker=${tourLat},${tourLng}`;
+            const centerLat = (userLocation.lat + latitude) / 2;
+            const centerLng = (userLocation.lng + longitude) / 2;
+            center = `${centerLat},${centerLng}`;
+            markers += `&markers=color:blue%7Clabel:You%7C${userLocation.lat},${userLocation.lng}`;
         }
+        
+        return `https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'demo'}&q=${latitude},${longitude}&zoom=${zoom}&center=${center}${markers}`;
+    };
 
-        return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik${markers}`;
+    const handleGetDirections = () => {
+        const directionsUrl = getGoogleMapsDirectionsUrl();
+        if (directionsUrl) {
+            window.open(directionsUrl, '_blank');
+        }
+    };
+
+    const handleViewOnGoogleMaps = () => {
+        if (hasGPSData) {
+            const { latitude, longitude } = tour.gpsLocation.coordinates;
+            const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}&zoom=15`;
+            window.open(mapsUrl, '_blank');
+        }
     };
 
     const formatDistance = (dist) => {
@@ -202,13 +224,28 @@ const LiveGPSMap = ({ tour, showUserLocation = true }) => {
 
     const MapContent = ({ isFullSize = false }) => (
         <div className={`relative ${isFullSize ? 'h-full' : 'h-64 sm:h-80'} bg-gray-200 rounded-xl overflow-hidden`}>
-            <iframe
-                ref={mapRef}
-                src={generateMapUrl(isFullSize)}
-                className="w-full h-full border-0"
-                title={`Live GPS Map - ${tour.title}`}
-                loading="lazy"
-            />
+            {!mapError ? (
+                <iframe
+                    src={getGoogleMapsEmbedUrl() || generateOpenStreetMapUrl()}
+                    className="w-full h-full border-0"
+                    title={`Live GPS Map - ${tour.title}`}
+                    loading="lazy"
+                    onError={() => setMapError(true)}
+                />
+            ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                    <div className="text-center">
+                        <FaMapMarkerAlt className="text-4xl text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-600 mb-4">Unable to load map</p>
+                        <button
+                            onClick={handleViewOnGoogleMaps}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+                        >
+                            View on Google Maps
+                        </button>
+                    </div>
+                </div>
+            )}
             
             {/* Map Controls */}
             <div className="absolute top-3 right-3 flex flex-col space-y-2">
@@ -250,6 +287,35 @@ const LiveGPSMap = ({ tour, showUserLocation = true }) => {
             )}
         </div>
     );
+
+    // Fallback to OpenStreetMap if Google Maps fails
+    const generateOpenStreetMapUrl = () => {
+        if (!hasGPSData) return null;
+
+        const tourLat = tour.gpsLocation.coordinates.latitude;
+        const tourLng = tour.gpsLocation.coordinates.longitude;
+        
+        let bbox, markers = "";
+        
+        if (userLocation) {
+            // Show both user and tour location
+            const minLat = Math.min(userLocation.lat, tourLat) - 0.01;
+            const maxLat = Math.max(userLocation.lat, tourLat) + 0.01;
+            const minLng = Math.min(userLocation.lng, tourLng) - 0.01;
+            const maxLng = Math.max(userLocation.lng, tourLng) + 0.01;
+            
+            bbox = `${minLng},${minLat},${maxLng},${maxLat}`;
+            markers = `&marker=${tourLat},${tourLng}&marker=${userLocation.lat},${userLocation.lng}`;
+        } else {
+            // Show only tour location
+            const center = mapCenter || { lat: tourLat, lng: tourLng };
+            const offset = 0.01;
+            bbox = `${center.lng - offset},${center.lat - offset},${center.lng + offset},${center.lat + offset}`;
+            markers = `&marker=${tourLat},${tourLng}`;
+        }
+
+        return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik${markers}`;
+    };
 
     return (
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
@@ -316,22 +382,20 @@ const LiveGPSMap = ({ tour, showUserLocation = true }) => {
                 {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row gap-3 mt-4">
                     <button
-                        onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${tour.gpsLocation.coordinates.latitude},${tour.gpsLocation.coordinates.longitude}`, '_blank')}
+                        onClick={handleGetDirections}
                         className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
                     >
                         <FaRoute />
-                        <span>Get Directions</span>
+                        <span>Get Directions with Travel Options</span>
                     </button>
                     
-                    {userLocation && (
-                        <button
-                            onClick={() => window.open(`https://www.google.com/maps/dir/${userLocation.lat},${userLocation.lng}/${tour.gpsLocation.coordinates.latitude},${tour.gpsLocation.coordinates.longitude}`, '_blank')}
-                            className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
-                        >
-                            <FaLocationArrow />
-                            <span>Navigate from Here</span>
-                        </button>
-                    )}
+                    <button
+                        onClick={handleViewOnGoogleMaps}
+                        className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+                    >
+                        <FaMapMarkerAlt />
+                        <span>Explore Area on Google Maps</span>
+                    </button>
                 </div>
             </div>
 

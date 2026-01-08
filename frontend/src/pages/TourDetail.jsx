@@ -7,7 +7,7 @@ import BookingModal from "../components/BookingModal";
 import ReviewSection from "../components/ReviewSection";
 import StarRating from "../components/StarRating";
 import WishlistButton from "../components/WishlistButton";
-import RealTimeGPSDashboard from "../components/RealTimeGPSDashboard";
+// import RealTimeGPSDashboard from "../components/RealTimeGPSDashboard";
 
 const TourDetail = () => {
   const { id } = useParams();
@@ -21,8 +21,11 @@ const TourDetail = () => {
   const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
+    console.log('TourDetail: Fetching tour with ID:', id);
     dispatch(fetchTourById(id));
   }, [dispatch, id]);
+
+  console.log('TourDetail: Current state:', { singleTour, singleLoading, singleError });
 
   if (singleLoading)
     return (
@@ -218,9 +221,42 @@ const TourDetail = () => {
         />
       )}
 
-      {/* Real-Time GPS Dashboard */}
+      {/* Tour Location Section */}
       <div className="mt-8">
-        <RealTimeGPSDashboard tour={singleTour} />
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">Tour Location</h3>
+          <p className="text-gray-600 mb-4">📍 {singleTour.location}</p>
+          
+          {singleTour?.gpsLocation?.coordinates && (
+            <div className="space-y-2">
+              <p className="text-sm text-gray-500">
+                GPS Coordinates: {singleTour.gpsLocation.coordinates.latitude.toFixed(6)}, {singleTour.gpsLocation.coordinates.longitude.toFixed(6)}
+              </p>
+              <div className="flex space-x-4">
+                <button
+                  onClick={() => {
+                    const { latitude, longitude } = singleTour.gpsLocation.coordinates;
+                    const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}&travelmode=driving`;
+                    window.open(directionsUrl, '_blank');
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                >
+                  Get Directions
+                </button>
+                <button
+                  onClick={() => {
+                    const { latitude, longitude } = singleTour.gpsLocation.coordinates;
+                    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}&zoom=15`;
+                    window.open(mapsUrl, '_blank');
+                  }}
+                  className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                >
+                  View on Maps
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Reviews Section */}
