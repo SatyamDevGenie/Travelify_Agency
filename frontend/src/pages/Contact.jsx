@@ -1,6 +1,8 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock, FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
+import Globe3D from "../components/3D/Globe3D";
+import ParticleSystem from "../components/3D/ParticleSystem";
 
 const Contact = () => {
     // Contact Info Card Component
@@ -32,9 +34,19 @@ const Contact = () => {
     );
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 relative overflow-hidden">
+            {/* 3D Globe Background */}
+            <div className="fixed inset-0 z-0 opacity-20">
+                <Globe3D />
+            </div>
+            
+            {/* Particle System */}
+            <div className="absolute inset-0 z-10 opacity-40">
+                <ParticleSystem type="floating" particleCount={100} color="#3b82f6" />
+            </div>
+            
             {/* Hero Section */}
-            <section className="relative py-20 lg:py-32 overflow-hidden">
+            <section className="relative py-20 lg:py-32 overflow-hidden z-20">
                 {/* Background Pattern */}
                 <div className="absolute inset-0 opacity-5">
                     <div className="absolute inset-0" style={{

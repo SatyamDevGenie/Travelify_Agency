@@ -7,6 +7,8 @@ import BookingModal from "../components/BookingModal";
 import ReviewSection from "../components/ReviewSection";
 import StarRating from "../components/StarRating";
 import WishlistButton from "../components/WishlistButton";
+import AdventureScene from "../components/3D/AdventureScene";
+import BeachParadise from "../components/3D/BeachParadise";
 // import RealTimeGPSDashboard from "../components/RealTimeGPSDashboard";
 
 const TourDetail = () => {
@@ -66,8 +68,8 @@ const TourDetail = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-      <div className="bg-white shadow-2xl rounded-3xl overflow-hidden transform transition duration-500 hover:scale-[1.01] border border-gray-100">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 relative">
+      <div className="bg-white shadow-2xl rounded-3xl overflow-hidden transform transition duration-500 hover:scale-[1.01] border border-gray-100 relative z-10">
 
         {/* Image + Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2">

@@ -7,6 +7,8 @@ import { showToast } from "../utils/toast";
 import StarRating from "./StarRating";
 import WishlistButton from "./WishlistButton";
 import LikeButton from "./LikeButton";
+import CitySkyline from "./3D/CitySkyline";
+import ParticleSystem from "./3D/ParticleSystem";
 
 const Tours = () => {
   const dispatch = useDispatch();
@@ -112,8 +114,8 @@ const Tours = () => {
     );
 
   return (
-    <div className="min-h-screen bg-slate-50 py-responsive">
-      <div className="container-fluid">
+    <div className="min-h-screen bg-slate-50 py-responsive relative overflow-hidden">
+      <div className="container-fluid relative z-20">
         {/* Header + Create Tour Button */}
         <div className="page-header">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">

@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { motion } from "framer-motion";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import Tours from "../components/Tours";
 import BlockbusterOffers from "../components/Offers";
@@ -16,25 +15,11 @@ const Home = () => {
 
     return (
         <div className="min-h-screen bg-slate-50">
-            {/* Hero Section */}
-            <section className="relative h-screen flex items-center justify-center overflow-hidden">
-                {/* Background Image with Overlay */}
-                <div 
-                    className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-                    style={{
-                        backgroundImage: "url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80')",
-                    }}
-                >
-                    <div className="absolute inset-0 bg-gradient-to-br from-slate-900/70 via-slate-800/60 to-slate-900/70"></div>
-                </div>
-
+            {/* Hero Section - Clean Background */}
+            <section className="relative h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600">
                 {/* Hero Content */}
-                <div className="relative z-10 text-center text-white px-4 sm:px-6 max-w-4xl mx-auto">
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, ease: "easeOut" }}
-                    >
+                <div className="relative z-30 text-center text-white px-4 sm:px-6 max-w-4xl mx-auto">
+                    <div>
                         <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight mb-6">
                             Discover Your Next
                             <span className="block bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
@@ -49,50 +34,39 @@ const Home = () => {
                         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                             <Link
                                 to="/tours"
-                                className="btn-primary text-lg px-8 py-4 bg-white text-slate-900 hover:bg-slate-100"
+                                className="btn-primary text-lg px-8 py-4 bg-white text-slate-900 hover:bg-slate-100 rounded-lg transition-all duration-300 transform hover:scale-105"
                             >
                                 Explore Tours
                             </Link>
                             <Link
                                 to="/about"
-                                className="btn-secondary text-lg px-8 py-4 bg-transparent border-white text-white hover:bg-white/10"
+                                className="btn-secondary text-lg px-8 py-4 bg-transparent border-2 border-white text-white hover:bg-white/10 rounded-lg transition-all duration-300"
                             >
                                 Learn More
                             </Link>
                         </div>
-                    </motion.div>
+                    </div>
                 </div>
 
-                {/* Scroll Indicator */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 1.5, duration: 0.5 }}
-                    className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
-                >
+                {/* Simple Scroll Indicator */}
+                <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-30">
                     <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center">
-                        <div className="w-1 h-3 bg-white/60 rounded-full mt-2 animate-bounce"></div>
+                        <div className="w-1 h-3 bg-white/60 rounded-full mt-2"></div>
                     </div>
-                </motion.div>
+                </div>
             </section>
 
             {/* Features Section */}
             <section className="py-20 bg-white">
                 <div className="container-fluid">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
-                        viewport={{ once: true }}
-                        className="text-center mb-16"
-                    >
+                    <div className="text-center mb-16">
                         <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
                             Why Choose Travelify?
                         </h2>
                         <p className="text-lg text-slate-600 max-w-2xl mx-auto">
                             We make travel planning effortless with our professional booking system and exceptional service.
                         </p>
-                    </motion.div>
+                    </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {[
@@ -112,13 +86,9 @@ const Home = () => {
                                 description: "Professional support team and transparent pricing with no hidden fees."
                             }
                         ].map((feature, index) => (
-                            <motion.div
+                            <div
                                 key={index}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.6, delay: index * 0.1 }}
-                                viewport={{ once: true }}
-                                className="card hover-lift text-center p-8"
+                                className="card hover-lift text-center p-8 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
                             >
                                 <div className="text-4xl mb-4">{feature.icon}</div>
                                 <h3 className="text-xl font-semibold text-slate-900 mb-3">
@@ -127,7 +97,65 @@ const Home = () => {
                                 <p className="text-slate-600 leading-relaxed">
                                     {feature.description}
                                 </p>
-                            </motion.div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Journey Planning Section */}
+            <section className="py-20 bg-gradient-to-b from-slate-900 via-blue-900 to-purple-900">
+                <div className="container-fluid">
+                    <div className="text-center mb-12">
+                        <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+                            Plan Your Perfect Journey
+                        </h2>
+                        <p className="text-lg text-purple-100">
+                            Simple steps to explore destinations and create your dream itinerary
+                        </p>
+                    </div>
+                    
+                    {/* Planning Steps */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+                        {[
+                            { title: "Choose Destination", icon: "🗺️", color: "from-blue-500 to-cyan-500" },
+                            { title: "Plan Activities", icon: "🎯", color: "from-purple-500 to-pink-500" },
+                            { title: "Book & Travel", icon: "✈️", color: "from-green-500 to-emerald-500" }
+                        ].map((step, index) => (
+                            <div
+                                key={index}
+                                className={`bg-gradient-to-br ${step.color} p-6 rounded-xl text-white text-center transform hover:scale-105 transition-all duration-300 cursor-pointer`}
+                            >
+                                <div className="text-4xl mb-4">{step.icon}</div>
+                                <h3 className="text-xl font-bold">{step.title}</h3>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Luxury Experience Section */}
+            <section className="py-20 bg-gradient-to-b from-cyan-400 via-blue-500 to-blue-600">
+                <div className="container-fluid">
+                    <div className="text-center mb-12">
+                        <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+                            Luxury Redefined
+                        </h2>
+                        <p className="text-lg text-cyan-100 max-w-2xl mx-auto">
+                            Experience premium travel with private jets, luxury yachts, and 5-star resorts. 
+                            Your comfort is our priority.
+                        </p>
+                    </div>
+                    
+                    {/* Luxury Icons */}
+                    <div className="flex justify-center space-x-8 mt-12">
+                        {["🛥️", "✈️", "🏖️", "🍾"].map((icon, index) => (
+                            <div
+                                key={index}
+                                className="text-6xl"
+                            >
+                                {icon}
+                            </div>
                         ))}
                     </div>
                 </div>
@@ -136,38 +164,26 @@ const Home = () => {
             {/* Tours Section */}
             <section className="py-20 bg-slate-50">
                 <div className="container-fluid">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
-                        viewport={{ once: true }}
-                        className="text-center mb-12"
-                    >
+                    <div className="text-center mb-12">
                         <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
                             Popular Destinations
                         </h2>
                         <p className="text-lg text-slate-600">
                             Discover our most loved travel experiences
                         </p>
-                    </motion.div>
+                    </div>
                     <Tours />
                 </div>
             </section>
 
             {/* Photo Gallery Section */}
-            <section className="py-20 bg-white">
+            <section className="py-20 bg-gradient-to-br from-orange-400 via-red-500 to-pink-600">
                 <div className="container-fluid">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
-                        viewport={{ once: true }}
-                        className="text-center mb-12"
-                    >
-                        <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
+                    <div className="text-center mb-12">
+                        <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
                             Travel Memories
                         </h2>
-                        <p className="text-lg text-slate-600 mb-8">
+                        <p className="text-lg text-orange-100 mb-8">
                             Share your travel photos and explore memories from fellow travelers
                         </p>
                         
@@ -175,7 +191,7 @@ const Home = () => {
                         <div className="flex justify-center mb-8">
                             <PhotoUpload onPhotoUploaded={handlePhotoUploaded} />
                         </div>
-                    </motion.div>
+                    </div>
                     
                     {/* Photo Gallery */}
                     <PhotoGallery refreshTrigger={photoRefreshTrigger} />
@@ -195,12 +211,7 @@ const Home = () => {
             {/* CTA Section */}
             <section className="py-20 bg-gradient-to-br from-slate-900 to-slate-800 text-white">
                 <div className="container-fluid text-center">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
-                        viewport={{ once: true }}
-                    >
+                    <div>
                         <h2 className="text-3xl sm:text-4xl font-bold mb-4">
                             Ready for Your Next Adventure?
                         </h2>
@@ -209,11 +220,11 @@ const Home = () => {
                         </p>
                         <Link
                             to="/tours"
-                            className="btn-primary text-lg px-8 py-4 bg-white text-slate-900 hover:bg-slate-100"
+                            className="btn-primary text-lg px-8 py-4 bg-white text-slate-900 hover:bg-slate-100 rounded-lg transition-all duration-300 transform hover:scale-105"
                         >
                             Start Planning Today
                         </Link>
-                    </motion.div>
+                    </div>
                 </div>
             </section>
         </div>
@@ -221,5 +232,3 @@ const Home = () => {
 };
 
 export default Home;
-
-
