@@ -114,7 +114,7 @@ const Home = () => {
                             Simple steps to explore destinations and create your dream itinerary
                         </p>
                     </div>
-                    
+
                     {/* Planning Steps */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
                         {[
@@ -142,11 +142,11 @@ const Home = () => {
                             Luxury Redefined
                         </h2>
                         <p className="text-lg text-cyan-100 max-w-2xl mx-auto">
-                            Experience premium travel with private jets, luxury yachts, and 5-star resorts. 
+                            Experience premium travel with private jets, luxury yachts, and 5-star resorts.
                             Your comfort is our priority.
                         </p>
                     </div>
-                    
+
                     {/* Luxury Icons */}
                     <div className="flex justify-center space-x-8 mt-12">
                         {["🛥️", "✈️", "🏖️", "🍾"].map((icon, index) => (
@@ -186,13 +186,13 @@ const Home = () => {
                         <p className="text-lg text-orange-100 mb-8">
                             Share your travel photos and explore memories from fellow travelers
                         </p>
-                        
+
                         {/* Photo Upload Button */}
                         <div className="flex justify-center mb-8">
                             <PhotoUpload onPhotoUploaded={handlePhotoUploaded} />
                         </div>
                     </div>
-                    
+
                     {/* Photo Gallery */}
                     <PhotoGallery refreshTrigger={photoRefreshTrigger} />
                 </div>
@@ -202,11 +202,11 @@ const Home = () => {
             <MediaUploadSection />
 
             {/* Offers Section */}
-            <section className="py-20 bg-white">
+            {/* <section className="py-20 bg-white">
                 <div className="container-fluid">
                     <BlockbusterOffers />
                 </div>
-            </section>
+            </section> */}
 
             {/* CTA Section */}
             <section className="py-20 bg-gradient-to-br from-slate-900 to-slate-800 text-white">
